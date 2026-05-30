@@ -48,18 +48,6 @@ jobs:
 
   e2e-gcp:
     runs-on: ubuntu-latest
-    services:
-      pubsub-emulator:
-        image: google/cloud-sdk:emulators
-        ports:
-          - 8085:8085
-        options: >-
-          --entrypoint gcloud
-          beta emulators pubsub start
-          --project=test-project
-          --host-port=0.0.0.0:8085
-    env:
-      PUBSUB_EMULATOR_HOST: localhost:8085
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
@@ -69,4 +57,22 @@ jobs:
       - uses: arduino/setup-task@v2
         with:
           version: '3.x'
+
+      - name: Start Pub/Sub emulator
+        run: |
+          docker run -d --name pubsub-emulator -p 8085:8085 \
+            google/cloud-sdk:emulators \
+            gcloud beta emulators pubsub start \
+            --project=test-project --host-port=0.0.0.0:8085
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:8085/; then break; fi
+            sleep 1
+          done
+
       - run: task e2e-gcp-ci
+        env:
+          PUBSUB_EMULATOR_HOST: localhost:8085
+
+      - name: Stop Pub/Sub emulator
+        if: always()
+        run: docker rm -f pubsub-emulator || true
