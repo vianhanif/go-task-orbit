@@ -1,49 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 240" width="600" height="240">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 260" width="620" height="260">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="0%" stop-color="#0a0e14"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c2333"/>
       <stop offset="100%" stop-color="#161b22"/>
     </linearGradient>
-    <marker id="aBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#58a6ff"/>
+    <linearGradient id="slot" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e2a3a"/>
+      <stop offset="100%" stop-color="#151d28"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="shadow-sm">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/>
     </marker>
-    <marker id="aPurple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#d2a8ff"/>
+    <marker id="aPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#d2a8ff"/>
     </marker>
   </defs>
-  <rect width="600" height="240" rx="8" fill="url(#bg)"/>
-  <text x="300" y="30" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="13" font-weight="bold" fill="#e6edf3">Ring Buffer Internals</text>
-  <!-- Border -->
-  <rect x="10" y="44" width="580" height="182" rx="8" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6 3"/>
-  <!-- Write side -->
-  <rect x="30" y="80" width="130" height="50" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
-  <text x="95" y="102" text-anchor="middle" font-family="SF Mono,monospace" font-size="9" fill="#58a6ff">Head Cursor</text>
-  <text x="95" y="118" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#8b949e">atomic.Uint64</text>
-  <!-- Slots -->
-  <rect x="190" y="72" width="68" height="50" rx="5" fill="#1c2333" stroke="#58a6ff" stroke-width="1.2"/>
-  <text x="224" y="90" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#58a6ff">Slot 0</text>
-  <text x="224" y="103" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">seq: 42</text>
-  <text x="224" y="114" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">ref</text>
-  <rect x="264" y="72" width="68" height="50" rx="5" fill="#1c2333" stroke="#3fb950" stroke-width="1.2"/>
-  <text x="298" y="90" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#3fb950">Slot 1</text>
-  <text x="298" y="103" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">seq: 43</text>
-  <text x="298" y="114" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">ref</text>
-  <rect x="338" y="72" width="68" height="50" rx="5" fill="#1c2333" stroke="#d2a8ff" stroke-width="1.2"/>
-  <text x="372" y="90" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#d2a8ff">Slot 2</text>
-  <text x="372" y="103" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">seq: 44</text>
-  <text x="372" y="114" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">ref</text>
-  <rect x="412" y="72" width="68" height="50" rx="5" fill="#1c2333" stroke="#30363d" stroke-width="1" stroke-dasharray="3 2"/>
-  <text x="446" y="96" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#8b949e">Slot 3</text>
-  <rect x="486" y="72" width="46" height="50" rx="5" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="3 2"/>
-  <text x="509" y="96" text-anchor="middle" font-family="monospace" font-size="14" fill="#8b949e">...</text>
-  <!-- Read side -->
-  <rect x="30" y="152" width="130" height="50" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5"/>
-  <text x="95" y="174" text-anchor="middle" font-family="SF Mono,monospace" font-size="9" fill="#d2a8ff">Tail Cursor</text>
-  <text x="95" y="190" text-anchor="middle" font-family="SF Mono,monospace" font-size="8" fill="#8b949e">atomic.Uint64</text>
-  <!-- Arrows -->
-  <line x1="160" y1="105" x2="184" y2="90" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)"/>
-  <text x="172" y="85" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#58a6ff" opacity="0.7">write</text>
-  <line x1="160" y1="177" x2="184" y2="130" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aPurple)"/>
-  <text x="172" y="155" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#d2a8ff" opacity="0.7">read</text>
-  <text x="300" y="225" text-anchor="middle" font-family="SF Mono,monospace" font-size="9" fill="#8b949e">Power-of-two sizing: index = sequence &amp; mask</text>
+  <rect width="620" height="260" rx="12" fill="url(#bg)"/>
+  <text x="310" y="32" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">Ring Buffer Internals</text>
+  <rect x="12" y="48" width="596" height="198" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <rect x="30" y="85" width="140" height="55" rx="8" fill="url(#card)" stroke="#58a6ff" stroke-width="2" filter="url(#shadow)"/>
+  <text x="100" y="108" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#58a6ff">Head Cursor</text>
+  <text x="100" y="125" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">atomic.Uint64</text>
+  <rect x="200" y="75" width="72" height="55" rx="6" fill="url(#slot)" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="236" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#58a6ff">Slot 0</text>
+  <text x="236" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 42</text>
+  <text x="236" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
+  <rect x="278" y="75" width="72" height="55" rx="6" fill="url(#slot)" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="314" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#3fb950">Slot 1</text>
+  <text x="314" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 43</text>
+  <text x="314" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
+  <rect x="356" y="75" width="72" height="55" rx="6" fill="url(#slot)" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="392" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#d2a8ff">Slot 2</text>
+  <text x="392" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 44</text>
+  <text x="392" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
+  <rect x="434" y="75" width="72" height="55" rx="6" fill="url(#slot)" stroke="#30363d" stroke-width="1" stroke-dasharray="4 2" filter="url(#shadow-sm)"/>
+  <text x="470" y="100" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">Slot 3</text>
+  <text x="470" y="118" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">empty</text>
+  <rect x="512" y="75" width="50" height="55" rx="6" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="537" y="105" text-anchor="middle" font-family="monospace" font-size="18" fill="#8b949e">...</text>
+  <rect x="30" y="160" width="140" height="55" rx="8" fill="url(#card)" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
+  <text x="100" y="183" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Tail Cursor</text>
+  <text x="100" y="200" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">atomic.Uint64</text>
+  <line x1="170" y1="112" x2="195" y2="95" stroke="#58a6ff" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <text x="183" y="88" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#58a6ff" opacity="0.8">write</text>
+  <line x1="170" y1="187" x2="195" y2="140" stroke="#d2a8ff" stroke-width="2.5" marker-end="url(#aPurple)"/>
+  <text x="183" y="165" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#d2a8ff" opacity="0.8">read</text>
+  <text x="310" y="240" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">Power-of-two sizing: index = sequence &amp; mask (bitwise AND, no division)</text>
 </svg>

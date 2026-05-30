@@ -1,68 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 380" width="700" height="380">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="0%" stop-color="#0a0e14"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c2333"/>
       <stop offset="100%" stop-color="#161b22"/>
     </linearGradient>
-    <marker id="aGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#3fb950"/>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="shadow-sm">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="aGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#3fb950"/>
     </marker>
-    <marker id="aBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#58a6ff"/>
+    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/>
     </marker>
-    <marker id="aPurple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#d2a8ff"/>
+    <marker id="aPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#d2a8ff"/>
     </marker>
-    <marker id="aOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0,8 3,0 6" fill="#f0883e"/>
+    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#f0883e"/>
     </marker>
   </defs>
-  <rect width="700" height="380" rx="8" fill="url(#bg)"/>
-  <text x="350" y="28" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="13" font-weight="bold" fill="#e6edf3">The Big Picture</text>
-  <!-- Network layer -->
-  <text x="20" y="55" font-family="sans-serif" font-size="9" fill="#8b949e">Across the Network (slow, durable)</text>
-  <rect x="20" y="62" width="660" height="52" rx="6" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6 3"/>
-  <rect x="270" y="72" width="160" height="34" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.8"/>
-  <text x="350" y="94" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" font-weight="bold" fill="#3fb950">Amazon SQS</text>
-  <!-- Process layer -->
-  <text x="20" y="128" font-family="sans-serif" font-size="9" fill="#8b949e">Inside the Process (fast, predictable)</text>
-  <rect x="20" y="135" width="660" height="64" rx="6" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6 3"/>
-  <rect x="40" y="148" width="140" height="38" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.8"/>
-  <text x="110" y="165" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
-  <text x="110" y="179" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">Scheduling, Batching</text>
-  <rect x="220" y="148" width="140" height="38" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.8"/>
-  <text x="290" y="165" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
-  <text x="290" y="179" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">Bounded Concurrency</text>
-  <rect x="400" y="148" width="140" height="38" rx="6" fill="#161b22" stroke="#f0883e" stroke-width="1.8"/>
-  <text x="470" y="165" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" font-weight="bold" fill="#f0883e">Ack Batcher</text>
-  <text x="470" y="179" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">Batch DeleteMessages</text>
-  <!-- Process arrows -->
-  <line x1="180" y1="167" x2="215" y2="167" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aPurple)"/>
-  <text x="198" y="161" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#d2a8ff" opacity="0.7">~2μs</text>
-  <line x1="360" y1="167" x2="395" y2="167" stroke="#f0883e" stroke-width="2" marker-end="url(#aOrange)"/>
-  <!-- External layer -->
-  <text x="20" y="215" font-family="sans-serif" font-size="9" fill="#8b949e">External (optional, pluggable)</text>
-  <rect x="20" y="222" width="660" height="64" rx="6" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="6 3"/>
-  <rect x="40" y="235" width="200" height="38" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.8"/>
-  <text x="140" y="252" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Metrics / Traces</text>
-  <text x="140" y="266" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">via Hooks → OTel</text>
-  <rect x="440" y="235" width="200" height="38" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.8"/>
-  <text x="540" y="252" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" font-weight="bold" fill="#58a6ff">Idempotency Store</text>
-  <text x="540" y="266" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">In-Memory / Redis / DB</text>
-  <!-- Cross-layer arrows -->
-  <!-- SQS → Ring Buffer (batch receive) -->
-  <line x1="350" y1="106" x2="275" y2="143" stroke="#3fb950" stroke-width="2" marker-end="url(#aGreen)"/>
-  <text x="315" y="123" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3fb950" opacity="0.7">batch receive ~10ms</text>
-  <!-- Ack Batcher → SQS (batch delete) -->
-  <path d="M 470 148 Q 470 130 450 106 Q 430 82 400 85 Q 360 85 350 106" stroke="#f0883e" stroke-width="2" stroke-dasharray="5 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
-  <text x="460" y="120" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#f0883e" opacity="0.7">batch delete ~5ms</text>
-  <!-- Worker Pool → Metrics (emit hooks) -->
-  <line x1="260" y1="186" x2="160" y2="230" stroke="#d2a8ff" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#aPurple)" opacity="0.6"/>
-  <text x="190" y="213" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#d2a8ff" opacity="0.7">emit hooks</text>
-  <!-- Ring Buffer → Idempotency Store (check dedupe) -->
-  <line x1="140" y1="186" x2="520" y2="230" stroke="#58a6ff" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#aBlue)" opacity="0.6"/>
-  <text x="380" y="213" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#58a6ff" opacity="0.7">check dedupe</text>
-  <!-- Design principle -->
-  <text x="350" y="318" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#8b949e">SQS handles durability and delivery. Ring Buffer handles scheduling and concurrency.</text>
-  <text x="350" y="338" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#8b949e">Neither does the other's job — batched network I/O, microsecond in-process dispatch.</text>
+  <rect width="720" height="400" rx="12" fill="url(#bg)"/>
+  <text x="360" y="30" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">The Big Picture</text>
+  <text x="25" y="58" font-family="sans-serif" font-size="10" fill="#8b949e">Across the Network (slow, durable)</text>
+  <rect x="25" y="65" width="670" height="55" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <rect x="275" y="75" width="170" height="38" rx="8" fill="url(#card)" stroke="#3fb950" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="360" y="99" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#3fb950">Amazon SQS</text>
+  <text x="25" y="138" font-family="sans-serif" font-size="10" fill="#8b949e">Inside the Process (fast, predictable)</text>
+  <rect x="25" y="145" width="670" height="68" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <rect x="45" y="158" width="150" height="42" rx="8" fill="url(#card)" stroke="#58a6ff" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="120" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
+  <text x="120" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Scheduling, Batching</text>
+  <rect x="235" y="158" width="150" height="42" rx="8" fill="url(#card)" stroke="#d2a8ff" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="310" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
+  <text x="310" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Bounded Concurrency</text>
+  <rect x="425" y="158" width="150" height="42" rx="8" fill="url(#card)" stroke="#f0883e" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="500" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#f0883e">Ack Batcher</text>
+  <text x="500" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Batch DeleteMessages</text>
+  <line x1="195" y1="179" x2="230" y2="179" stroke="#d2a8ff" stroke-width="3" marker-end="url(#aPurple)"/>
+  <text x="213" y="172" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#d2a8ff" opacity="0.8">~2μs</text>
+  <line x1="385" y1="179" x2="420" y2="179" stroke="#f0883e" stroke-width="3" marker-end="url(#aOrange)"/>
+  <text x="403" y="172" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">results</text>
+  <text x="25" y="232" font-family="sans-serif" font-size="10" fill="#8b949e">External (optional, pluggable)</text>
+  <rect x="25" y="239" width="670" height="68" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <rect x="45" y="252" width="210" height="42" rx="8" fill="url(#card)" stroke="#d2a8ff" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="150" y="271" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Metrics / Traces</text>
+  <text x="150" y="287" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">via Hooks → OTel</text>
+  <rect x="460" y="252" width="210" height="42" rx="8" fill="url(#card)" stroke="#58a6ff" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="565" y="271" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#58a6ff">Idempotency Store</text>
+  <text x="565" y="287" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">In-Memory / Redis / DB</text>
+  <line x1="360" y1="113" x2="280" y2="153" stroke="#3fb950" stroke-width="2.5" marker-end="url(#aGreen)"/>
+  <text x="322" y="132" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#3fb950" opacity="0.8">batch receive ~10ms</text>
+  <path d="M 500 158 Q 500 140 480 120 Q 460 100 430 100 Q 395 100 375 115" stroke="#f0883e" stroke-width="2.5" stroke-dasharray="6 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
+  <text x="460" y="118" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#f0883e" opacity="0.7">batch delete ~5ms</text>
+  <line x1="280" y1="200" x2="165" y2="247" stroke="#d2a8ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#aPurple)" opacity="0.6"/>
+  <text x="200" y="228" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">emit hooks</text>
+  <line x1="155" y1="200" x2="540" y2="247" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#aBlue)" opacity="0.6"/>
+  <text x="390" y="228" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">check dedupe</text>
+  <text x="360" y="340" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">SQS handles durability and delivery. Ring Buffer handles scheduling and concurrency.</text>
+  <text x="360" y="360" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">Neither does the other's job — batched network I/O, microsecond in-process dispatch.</text>
 </svg>
