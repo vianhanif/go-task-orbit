@@ -22,6 +22,9 @@
     <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#d2a8ff"/>
     </marker>
+    <marker id="arrowTeal" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22c55e"/>
+    </marker>
   </defs>
 
   <!-- Background -->
@@ -32,7 +35,7 @@
     go-task-orbit
   </text>
   <text x="400" y="80" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="13" fill="#8b949e">
-    async worker runtime — ring buffer scheduling · pluggable transport · bounded concurrency
+    async worker runtime — ring buffer scheduling · pluggable transport (SQS, GCP Pub/Sub) · bounded concurrency
   </text>
 
   <!-- Outer decorative orbit ring -->
@@ -58,22 +61,36 @@
   <text x="400" y="297" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#e6edf3">RING</text>
   <text x="400" y="312" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e">BUFFER</text>
 
-  <!-- ===== LEFT: SQS ===== -->
-  <rect x="60" y="265" width="110" height="70" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="115" y="295" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#3fb950">SQS</text>
-  <text x="115" y="313" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">Transport</text>
+  <!-- ===== LEFT: TRANSPORTS ===== -->
+  <!-- Transport group border -->
+  <rect x="40" y="220" width="150" height="165" rx="10" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="5 3" opacity="0.5"/>
+  <text x="115" y="242" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e" opacity="0.6">pluggable transport</text>
+
+  <!-- SQS -->
+  <rect x="60" y="252" width="110" height="55" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="115" y="276" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#3fb950">SQS</text>
+  <text x="115" y="293" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">AWS Transport</text>
+
+  <!-- Pub/Sub -->
+  <rect x="60" y="325" width="110" height="45" rx="8" fill="#161b22" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="115" y="345" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#22c55e">Pub/Sub</text>
+  <text x="115" y="360" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">GCP Transport</text>
 
   <!-- Arrow: SQS → Ring -->
-  <line x1="170" y1="300" x2="288" y2="300" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
-  <text x="230" y="293" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">batch recv</text>
+  <line x1="170" y1="280" x2="288" y2="280" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <text x="230" y="273" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">batch recv</text>
+
+  <!-- Arrow: Pub/Sub → Ring -->
+  <line x1="170" y1="348" x2="288" y2="320" stroke="#22c55e" stroke-width="2.2" marker-end="url(#arrowTeal)"/>
+  <text x="230" y="328" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#22c55e" opacity="0.7">pull/sub</text>
 
   <!-- ===== TOP: PRODUCER ===== -->
   <rect x="335" y="140" width="130" height="55" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
   <text x="400" y="163" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#e6edf3">Producers</text>
   <text x="400" y="181" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">Enqueue →</text>
 
-  <!-- Arrow: Producer → SQS -->
-  <path d="M 335 168 L 175 168 Q 140 168 140 203 L 140 265" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)" opacity="0.6"/>
+  <!-- Arrow: Producer → Transports -->
+  <path d="M 335 168 L 185 168 Q 155 168 155 200 L 155 252" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)" opacity="0.6"/>
 
   <!-- ===== RIGHT: WORKER POOL ===== -->
   <rect x="645" y="225" width="110" height="55" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
@@ -98,8 +115,13 @@
   <line x1="700" y1="280" x2="700" y2="334" stroke="#f0883e" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
   <text x="722" y="310" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">results</text>
 
-  <!-- Arrow: Ack → SQS -->
-  <path d="M 645 368 L 310 368 Q 270 368 270 333 L 270 305" fill="none" stroke="#f0883e" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)" opacity="0.6"/>
+  <!-- Arrow: Ack → SQS (return) -->
+  <path d="M 645 360 L 290 360 Q 260 360 260 340 L 260 305" fill="none" stroke="#f0883e" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)" opacity="0.6"/>
+  <text x="460" y="355" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" fill="#f0883e" opacity="0.6">ack/delete</text>
+
+  <!-- Arrow: Ack → Pub/Sub (return) -->
+  <path d="M 645 380 L 320 380 Q 295 380 295 360 L 295 370" fill="none" stroke="#f0883e" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)" opacity="0.5"/>
+  <text x="470" y="392" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" fill="#f0883e" opacity="0.5">ack</text>
 
   <!-- ===== BOTTOM: FEATURE LABELS ===== -->
   <g transform="translate(100, 425)">
@@ -122,5 +144,4 @@
     <text x="67" y="18" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#f0883e">Graceful Drain</text>
     <text x="67" y="32" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">SIGTERM safe</text>
   </g>
-
 </svg>
