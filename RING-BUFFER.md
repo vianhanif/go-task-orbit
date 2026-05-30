@@ -28,15 +28,7 @@ The key property: **it never grows**. The size is fixed at creation time. This b
 
 Channels are the idiomatic Go concurrency primitive, but they have limitations for high-throughput worker systems:
 
-```mermaid
-flowchart LR
-    subgraph "Go Channel"
-        P1[Producer 1] -->|"ch <- msg"| CH{Unbuffered<br/>Channel} -->|"msg := <-ch"| W1[Worker 1]
-        P2[Producer 2] -->|"ch <- msg"| CH
-        P3[Producer 3] -->|"ch <- msg"| CH
-        CH -.->|"blocks when<br/>receiver slow"| P1
-    end
-```
+![Go Channel — single receiver, blocks sender on backpressure](images/01-go-channel-comparison.svg)
 
 | Problem | Channel | Ring Buffer |
 |---|---|---|
@@ -49,19 +41,7 @@ flowchart LR
 
 ### ...Direct Goroutine Per Message?
 
-```mermaid
-flowchart TB
-    subgraph "Goroutine Per Message"
-        SQS[SQS Poller] -->|"spawn goroutine"| G1[goroutine 1]
-        SQS -->|"spawn goroutine"| G2[goroutine 2]
-        SQS -->|"spawn goroutine"| G3[goroutine 3]
-        SQS -->|"spawn goroutine"| GN[goroutine ...N]
-        G1 --> CPU[CPU Thrashing]
-        G2 --> CPU
-        G3 --> CPU
-        GN --> CPU
-    end
-```
+![Goroutine Per Message — unbounded goroutines → CPU thrashing](images/02-goroutine-per-message.svg)
 
 Under load, this causes:
 - **Goroutine explosion** — thousands of goroutines, each with its own stack (min 2KB)
@@ -71,15 +51,7 @@ Under load, this causes:
 
 ### ...Redis Polling (go-workers style)?
 
-```mermaid
-flowchart LR
-    subgraph "Redis Polling"
-        P[Producer] -->|"LPUSH"| R[(Redis)]
-        W1[Worker 1] -->|"BRPOP (poll)"| R
-        W2[Worker 2] -->|"BRPOP (poll)"| R
-        W3[Worker 3] -->|"BRPOP (poll)"| R
-    end
-```
+![Redis Polling — network hop per message, Redis bottleneck](images/03-redis-polling.svg)
 
 Problems:
 - **Network hop on every message** — adds 1-5ms latency per job
@@ -95,56 +67,11 @@ Problems:
 
 ### The Flow
 
-```mermaid
-sequenceDiagram
-    participant SQS as SQS Poller
-    participant RB as Ring Buffer
-    participant DP as Dispatcher
-    participant WP as Worker Pool
-    participant AB as Ack Batcher
-
-    SQS->>SQS: batch ReceiveMessage (up to 10)
-    SQS->>RB: EnqueueBatch(msgs)
-    Note over RB: write messages to slots<br/>advance head (atomic)
-    
-    DP->>RB: ReadBatch()
-    Note over RB: read N slots<br/>advance tail (atomic)
-    DP->>WP: SubmitBatch(msgs)
-    
-    WP->>WP: bounded workers process
-    WP->>AB: collect results (Ack/Retry/DLQ)
-    
-    AB->>SQS: DeleteMessageBatch
-    AB->>SQS: SendMessage (DLQ, on failure)
-```
+![The Flow — SQS → Ring Buffer → Dispatcher → Worker Pool → Ack Batcher → SQS](images/04-the-flow.svg)
 
 ### Inside the Ring Buffer
 
-```mermaid
-flowchart TB
-    subgraph "Ring Buffer Internals"
-        direction LR
-        
-        subgraph "Write Side (Producer)"
-            H[Head Cursor<br/>atomic.Uint64]
-        end
-        
-        subgraph "Slots"
-            S0["Slot 0<br/>seq: 42<br/>msg ref"]
-            S1["Slot 1<br/>seq: 43<br/>msg ref"]
-            S2["Slot 2<br/>seq: 44<br/>msg ref"]
-            S3["Slot 3<br/>empty"]
-            SD["..."]
-        end
-        
-        subgraph "Read Side (Consumer)"
-            T[Tail Cursor<br/>atomic.Uint64]
-        end
-        
-        H -->|"write at<br/>head & mask"| S0
-        T -->|"read at<br/>tail & mask"| S2
-    end
-```
+![Ring Buffer Internals — power-of-two sizing, atomic head/tail, lock-free](images/05-ring-buffer-internals.svg)
 
 **The key trick: power-of-two sizing.**
 
@@ -191,16 +118,7 @@ Buffer: [A][B][C][D][E][F][G][H]  ← FULL (8/8 slots used)
          ↑read                    ↑write
 ```
 
-```mermaid
-flowchart TD
-    P[Producer: Enqueue msg] --> Q{Buffer full?}
-    Q -->|No| W[Write to slot]
-    Q -->|Yes| POL{Overflow Policy}
-    POL -->|Block| BL[Wait for consumer<br/>to free a slot]
-    POL -->|DropNewest| DN[Discard incoming msg<br/>increment drop counter]
-    POL -->|DropOldest| DO[Overwrite oldest slot<br/>advance tail]
-    POL -->|Reject| RJ[Return error to caller]
-```
+![Backpressure Policies — Block, DropNewest, DropOldest, Reject](images/06-backpressure-policies.svg)
 
 This is something Go channels cannot do — their only option is to block (or panic on unbuffered).
 
@@ -239,31 +157,7 @@ The ring buffer's bounded, lock-minimized design produces **predictable latency*
 
 ## The Big Picture: Where Ring Buffer Fits
 
-```mermaid
-flowchart TB
-    subgraph "Across the Network (slow, durable)"
-        SQS[Amazon SQS<br/>Durability, Cross-Pod, HA]
-    end
-
-    subgraph "Inside the Process (fast, predictable)"
-        RB[Ring Buffer<br/>Scheduling, Batching,<br/>Backpressure]
-        WP[Worker Pool<br/>Bounded Concurrency]
-        AB[Ack Batcher<br/>Batch DeleteMessages]
-    end
-
-    subgraph "External (optional, pluggable)"
-        ID[Idempotency Store<br/>In-Memory / Redis / DB]
-        MT[Metrics / Traces<br/>via Hooks → OTel]
-    end
-
-    SQS -->|"batch receive<br/>~10ms latency"| RB
-    RB -->|"batch dispatch<br/>~2μs latency"| WP
-    WP -->|"collect results"| AB
-    AB -->|"batch delete<br/>~5ms latency"| SQS
-
-    RB -.->|"check dedupe"| ID
-    WP -.->|"emit hooks"| MT
-```
+![The Big Picture — SQS for durability, Ring Buffer for speed](images/07-the-big-picture.svg)
 
 **The design principle:**
 

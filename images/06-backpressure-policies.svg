@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350" width="600" height="350">
+  <rect width="600" height="350" rx="8" fill="#0d1117"/>
+  <text x="300" y="35" text-anchor="middle" font-family="SF Mono, monospace" font-size="13" font-weight="bold" fill="#e6edf3">Backpressure Policies</text>
+  <rect x="200" y="65" width="150" height="45" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="275" y="85" text-anchor="middle" font-family="SF Mono, monospace" font-size="11" fill="#58a6ff">Enqueue msg</text>
+  <text x="275" y="99" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Producer</text>
+  <polygon points="275,110 265,120 285,120" fill="#58a6ff"/>
+  <rect x="200" y="125" width="150" height="40" rx="6" fill="#161b22" stroke="#f0883e" stroke-width="1.5"/>
+  <text x="275" y="145" text-anchor="middle" font-family="SF Mono, monospace" font-size="10" fill="#f0883e">Buffer full?</text>
+  <line x1="275" y1="165" x2="275" y2="180" stroke="#8b949e" stroke-width="1.5"/>
+  <line x1="275" y1="180" x2="100" y2="180" stroke="#8b949e" stroke-width="1.5"/>
+  <line x1="275" y1="180" x2="500" y2="180" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="185" y="175" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">No</text>
+  <text x="500" y="175" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Yes</text>
+  <line x1="100" y1="180" x2="100" y2="215" stroke="#3fb950" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="220" width="140" height="40" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="100" y="245" text-anchor="middle" font-family="SF Mono, monospace" font-size="10" fill="#3fb950">Write to slot</text>
+  <line x1="500" y1="180" x2="500" y2="215" stroke="#f0883e" stroke-width="1.5"/>
+  <rect x="430" y="220" width="140" height="40" rx="6" fill="#161b22" stroke="#f0883e" stroke-width="1.5"/>
+  <text x="500" y="240" text-anchor="middle" font-family="SF Mono, monospace" font-size="10" fill="#f0883e">Overflow</text>
+  <text x="500" y="254" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Policy</text>
+  <line x1="500" y1="260" x2="500" y2="275" stroke="#f0883e" stroke-width="1"/>
+  <line x1="500" y1="275" x2="60" y2="275" stroke="#f0883e" stroke-width="1"/>
+  <line x1="60" y1="275" x2="60" y2="290" stroke="#d2a8ff" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="210" y1="275" x2="210" y2="290" stroke="#d2a8ff" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="360" y1="275" x2="360" y2="290" stroke="#d2a8ff" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="500" y1="275" x2="500" y2="290" stroke="#d2a8ff" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="10" y="295" width="100" height="40" rx="4" fill="#161b22" stroke="#d2a8ff" stroke-width="1"/>
+  <text x="60" y="312" text-anchor="middle" font-family="SF Mono, monospace" font-size="9" fill="#d2a8ff">Block</text>
+  <text x="60" y="326" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">wait for slot</text>
+  <rect x="160" y="295" width="100" height="40" rx="4" fill="#161b22" stroke="#d2a8ff" stroke-width="1"/>
+  <text x="210" y="312" text-anchor="middle" font-family="SF Mono, monospace" font-size="9" fill="#d2a8ff">DropNewest</text>
+  <text x="210" y="326" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">discard incoming</text>
+  <rect x="310" y="295" width="100" height="40" rx="4" fill="#161b22" stroke="#d2a8ff" stroke-width="1"/>
+  <text x="360" y="312" text-anchor="middle" font-family="SF Mono, monospace" font-size="9" fill="#d2a8ff">DropOldest</text>
+  <text x="360" y="326" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">overwrite oldest</text>
+  <rect x="450" y="295" width="100" height="40" rx="4" fill="#161b22" stroke="#d2a8ff" stroke-width="1"/>
+  <text x="500" y="312" text-anchor="middle" font-family="SF Mono, monospace" font-size="9" fill="#d2a8ff">Reject</text>
+  <text x="500" y="326" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8b949e">return error</text>
+  <defs><marker id="a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/></marker></defs>
+</svg>
