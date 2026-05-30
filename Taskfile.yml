@@ -1,0 +1,92 @@
+version: '3'
+
+vars:
+  FLOCI_IMAGE: floci/floci:latest
+  FLOCI_PORT: '4566'
+  FLOCI_GCP_IMAGE: floci/floci-gcp:latest
+  FLOCI_GCP_PORT: '4588'
+
+tasks:
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test -count=1 -timeout=60s ./...
+
+  test-race:
+    desc: Run unit tests with race detector
+    cmds:
+      - go test -race -count=1 -timeout=60s ./...
+
+  lint:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  e2e:
+    desc: Run AWS e2e tests with Floci (local Docker)
+    cmds:
+      - task: floci-start
+      - defer: { task: floci-stop }
+      - go test -tags=e2e -v -count=1 -timeout=120s ./e2e/...
+
+  e2e-ci:
+    desc: Run AWS e2e tests in CI (Floci already running as service container)
+    cmds:
+      - go test -tags=e2e -v -count=1 -timeout=120s ./e2e/...
+
+  e2e-gcp:
+    desc: Run GCP e2e tests with floci-gcp (local Docker)
+    cmds:
+      - task: floci-gcp-start
+      - defer: { task: floci-gcp-stop }
+      - go test -tags=e2e_gcp -v -count=1 -timeout=120s ./transport/pubsub/... ./e2e/...
+
+  e2e-gcp-ci:
+    desc: Run GCP e2e tests in CI
+    env:
+      PUBSUB_EMULATOR_HOST: localhost:4588
+    cmds:
+      - go test -tags=e2e_gcp -v -count=1 -timeout=120s ./transport/pubsub/... ./e2e/...
+
+  e2e-all:
+    desc: Run all e2e tests (AWS + GCP)
+    cmds:
+      - task: e2e
+      - task: e2e-gcp
+
+  floci-start:
+    desc: Start Floci AWS emulator
+    cmds:
+      - docker run -d --name floci-e2e -p {{.FLOCI_PORT}}:{{.FLOCI_PORT}} {{.FLOCI_IMAGE}}
+      - |
+        until curl -s http://localhost:{{.FLOCI_PORT}}/_floci/health; do
+          sleep 0.5
+        done
+
+  floci-stop:
+    desc: Stop and remove Floci container
+    cmds:
+      - docker rm -f floci-e2e 2>/dev/null || true
+    ignore_error: true
+
+  floci-gcp-start:
+    desc: Start Floci GCP emulator
+    cmds:
+      - docker run -d --name floci-gcp-e2e -p {{.FLOCI_GCP_PORT}}:{{.FLOCI_GCP_PORT}} {{.FLOCI_GCP_IMAGE}}
+      - |
+        until curl -s http://localhost:{{.FLOCI_GCP_PORT}}/_floci/health; do
+          sleep 0.5
+        done
+
+  floci-gcp-stop:
+    desc: Stop and remove Floci GCP container
+    cmds:
+      - docker rm -f floci-gcp-e2e 2>/dev/null || true
+    ignore_error: true
+
+  all:
+    desc: Run lint + unit tests + e2e tests
+    cmds:
+      - task: lint
+      - task: test
+      - task: e2e
