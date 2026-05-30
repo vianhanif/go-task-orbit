@@ -4,50 +4,45 @@
       <stop offset="0%" stop-color="#0a0e14"/>
       <stop offset="100%" stop-color="#0d1117"/>
     </linearGradient>
-    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1c2333"/>
-      <stop offset="100%" stop-color="#161b22"/>
-    </linearGradient>
-    <linearGradient id="cardOrange" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#2a1e14"/>
-      <stop offset="100%" stop-color="#1e1610"/>
-    </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
-    </filter>
-    <filter id="shadow-sm">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
-    </filter>
-    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/>
-    </marker>
-    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0,10 3.5,0 7" fill="#f0883e"/>
-    </marker>
+    <filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
+    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
+    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#f0883e"/></marker>
   </defs>
   <rect width="520" height="320" rx="12" fill="url(#bg)"/>
   <text x="260" y="32" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">Goroutine Per Message</text>
-  <rect x="25" y="80" width="140" height="55" rx="8" fill="url(#card)" stroke="#3fb950" stroke-width="2" filter="url(#shadow)"/>
-  <text x="95" y="103" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#3fb950">SQS Poller</text>
-  <text x="95" y="120" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">spawn goroutine</text>
-  <rect x="220" y="55" width="120" height="32" rx="6" fill="url(#card)" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow-sm)"/>
-  <text x="280" y="75" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#d2a8ff">goroutine 1</text>
-  <rect x="220" y="100" width="120" height="32" rx="6" fill="url(#card)" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow-sm)"/>
-  <text x="280" y="120" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#d2a8ff">goroutine 2</text>
-  <rect x="220" y="145" width="120" height="32" rx="6" fill="url(#card)" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow-sm)"/>
-  <text x="280" y="165" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#d2a8ff">goroutine 3</text>
-  <rect x="220" y="190" width="120" height="32" rx="6" fill="url(#card)" stroke="#d2a8ff" stroke-width="1" opacity="0.5" filter="url(#shadow-sm)"/>
-  <text x="280" y="210" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="10" fill="#d2a8ff" opacity="0.5">goroutine N</text>
-  <rect x="400" y="100" width="90" height="80" rx="8" fill="url(#cardOrange)" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
-  <text x="445" y="135" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="13" font-weight="bold" fill="#f0883e">CPU</text>
-  <text x="445" y="155" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#f0883e">Thrash</text>
-  <line x1="165" y1="100" x2="215" y2="71" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
-  <line x1="165" y1="107" x2="215" y2="116" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
-  <line x1="165" y1="107" x2="215" y2="161" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
-  <line x1="165" y1="107" x2="215" y2="206" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.5"/>
-  <line x1="340" y1="71" x2="395" y2="115" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
-  <line x1="340" y1="116" x2="395" y2="135" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
-  <line x1="340" y1="161" x2="395" y2="150" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
-  <line x1="340" y1="206" x2="395" y2="170" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.3"/>
+
+  <!-- SQS Poller - left -->
+  <rect x="20" y="80" width="140" height="55" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2" filter="url(#shadow)"/>
+  <text x="90" y="103" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#3fb950">SQS Poller</text>
+  <text x="90" y="120" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">spawn goroutine</text>
+
+  <!-- Goroutines - center column -->
+  <rect x="220" y="60" width="120" height="30" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="280" y="80" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#d2a8ff">goroutine 1</text>
+  <rect x="220" y="105" width="120" height="30" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="280" y="125" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#d2a8ff">goroutine 2</text>
+  <rect x="220" y="150" width="120" height="30" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="280" y="170" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#d2a8ff">goroutine 3</text>
+  <rect x="220" y="195" width="120" height="30" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1" opacity="0.5" filter="url(#shadow)"/>
+  <text x="280" y="215" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#d2a8ff" opacity="0.5">goroutine N</text>
+
+  <!-- CPU Thrashing - right -->
+  <rect x="400" y="100" width="100" height="80" rx="8" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="135" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="13" font-weight="bold" fill="#f0883e">CPU</text>
+  <text x="450" y="155" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#f0883e">Thrash</text>
+
+  <!-- Arrows: SQS → Goroutines -->
+  <line x1="160" y1="97" x2="215" y2="75" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
+  <line x1="160" y1="107" x2="215" y2="120" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
+  <line x1="160" y1="107" x2="215" y2="165" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.7"/>
+  <line x1="160" y1="107" x2="215" y2="210" stroke="#58a6ff" stroke-width="2" marker-end="url(#aBlue)" opacity="0.5"/>
+
+  <!-- Arrows: Goroutines → CPU Thrashing -->
+  <line x1="340" y1="75" x2="395" y2="115" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
+  <line x1="340" y1="120" x2="395" y2="135" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
+  <line x1="340" y1="165" x2="395" y2="150" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.5"/>
+  <line x1="340" y1="210" x2="395" y2="170" stroke="#f0883e" stroke-width="1.5" marker-end="url(#aOrange)" opacity="0.3"/>
+
+  <!-- Caption -->
   <text x="260" y="280" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#8b949e">Thousands of goroutines = context switching + memory + no backpressure</text>
 </svg>
