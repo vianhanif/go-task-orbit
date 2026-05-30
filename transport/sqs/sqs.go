@@ -69,10 +69,19 @@ func (t *SQSTransport) Publish(ctx context.Context, msg ringq.Message) error {
 	if err := t.ensureClient(ctx); err != nil {
 		return err
 	}
+	attrs := msg.Attributes
+	if attrs == nil {
+		attrs = make(map[string]string)
+	}
+	topicKey := t.config.TopicAttribute
+	if topicKey == "" {
+		topicKey = "X-Topic"
+	}
+	attrs[topicKey] = msg.Topic
 	input := &sqs.SendMessageInput{
 		QueueUrl:          aws.String(t.config.QueueURL),
 		MessageBody:       aws.String(string(msg.Payload)),
-		MessageAttributes: toSQSAttributes(msg.Attributes),
+		MessageAttributes: toSQSAttributes(attrs),
 	}
 	_, err := t.client.SendMessage(ctx, input)
 	return err
@@ -201,10 +210,11 @@ func fromSQSAttributes(attrs map[string]types.MessageAttributeValue) map[string]
 
 func (t *SQSTransport) fromSQSMessage(m types.Message) ringq.Message {
 	attrs := fromSQSAttributes(m.MessageAttributes)
-	topic := ""
-	if t.config.TopicAttribute != "" {
-		topic = attrs[t.config.TopicAttribute]
+	topicKey := t.config.TopicAttribute
+	if topicKey == "" {
+		topicKey = "X-Topic"
 	}
+	topic := attrs[topicKey]
 	return ringq.Message{
 		ID:            *m.MessageId,
 		Topic:         topic,
