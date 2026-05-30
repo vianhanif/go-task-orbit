@@ -152,17 +152,17 @@ pipeline.Idempotency(ringq.IdempotencyConfig{
 
 ## Status
 
-**Phase 1** (in development):
+**Phase 1** (implementation complete):
 - [x] Planning complete
-- [ ] Core types and interfaces
-- [ ] SQS transport
-- [ ] Ring buffer scheduler
-- [ ] Worker pool
-- [ ] Idempotency layer
-- [ ] Retry engine + DLQ
-- [ ] Pipeline builder API
-- [ ] Graceful shutdown
-- [ ] Tests and benchmarks
+- [x] Core types and interfaces
+- [x] SQS transport
+- [x] Ring buffer scheduler
+- [x] Worker pool
+- [x] Idempotency layer
+- [x] Retry engine + DLQ
+- [x] Pipeline builder API
+- [x] Graceful shutdown
+- [x] Tests and benchmarks
 
 ## License
 
