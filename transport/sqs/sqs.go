@@ -85,6 +85,9 @@ func (t *SQSTransport) Publish(ctx context.Context, msg ringq.Message) error {
 		topicKey = "X-Topic"
 	}
 	attrs[topicKey] = msg.Topic
+	if msg.NotBefore > 0 {
+		attrs["X-NotBefore"] = msg.NotBefore.String()
+	}
 	input := &sqs.SendMessageInput{
 		QueueUrl:          aws.String(t.config.QueueURL),
 		MessageBody:       aws.String(string(msg.Payload)),
@@ -222,11 +225,16 @@ func (t *SQSTransport) fromSQSMessage(m types.Message) ringq.Message {
 		topicKey = "X-Topic"
 	}
 	topic := attrs[topicKey]
+	var notBefore time.Duration
+	if nb, ok := attrs["X-NotBefore"]; ok {
+		notBefore, _ = time.ParseDuration(nb)
+	}
 	return ringq.Message{
 		ID:            *m.MessageId,
 		Topic:         topic,
 		Payload:       []byte(*m.Body),
 		ReceiptHandle: *m.ReceiptHandle,
 		Attributes:    attrs,
+		NotBefore:     notBefore,
 	}
 }

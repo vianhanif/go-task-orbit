@@ -83,6 +83,9 @@ func (t *PubSubTransport) Publish(ctx context.Context, msg ringq.Message) error 
 		attrs = make(map[string]string)
 	}
 	attrs[t.config.TopicAttribute] = msg.Topic
+	if msg.NotBefore > 0 {
+		attrs["X-NotBefore"] = msg.NotBefore.String()
+	}
 
 	result := t.topic.Publish(ctx, &pubsub.Message{
 		Data:       msg.Payload,
