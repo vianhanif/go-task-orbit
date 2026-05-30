@@ -1,66 +1,102 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a0e14"/>
-      <stop offset="100%" stop-color="#0d1117"/>
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
     </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
-    <marker id="aGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3fb950"/></marker>
-    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
-    <marker id="aPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d2a8ff"/></marker>
-    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#f0883e"/></marker>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#58a6ff"/>
+      <stop offset="50%" style="stop-color:#3fb950"/>
+      <stop offset="100%" style="stop-color:#d2a8ff"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d2a8ff"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f0883e"/>
+    </marker>
   </defs>
-  <rect width="720" height="400" rx="12" fill="url(#bg)"/>
-  <text x="360" y="30" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">The Big Picture</text>
 
-  <!-- Network layer -->
-  <text x="25" y="58" font-family="sans-serif" font-size="10" fill="#8b949e">Across the Network (slow, durable)</text>
-  <rect x="25" y="65" width="670" height="55" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
-  <rect x="275" y="75" width="170" height="38" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="360" y="99" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#3fb950">Amazon SQS</text>
+  <rect width="900" height="550" rx="16" fill="url(#bg)"/>
 
-  <!-- Process layer -->
-  <text x="25" y="138" font-family="sans-serif" font-size="10" fill="#8b949e">Inside the Process (fast, predictable)</text>
-  <rect x="25" y="145" width="670" height="68" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
-  <rect x="45" y="158" width="150" height="42" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="120" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
-  <text x="120" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Scheduling, Batching</text>
-  <rect x="235" y="158" width="150" height="42" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="310" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
-  <text x="310" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Bounded Concurrency</text>
-  <rect x="425" y="158" width="150" height="42" rx="8" fill="#161b22" stroke="#f0883e" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="500" y="177" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#f0883e">Ack Batcher</text>
-  <text x="500" y="193" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">Batch DeleteMessages</text>
+  <text x="450" y="45" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="24" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">The Big Picture: Where Ring Buffer Fits</text>
+  <text x="450" y="70" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="12" fill="#8b949e">SQS handles durability &amp; delivery · Ring Buffer handles scheduling &amp; backpressure</text>
 
-  <!-- Process arrows -->
-  <line x1="195" y1="179" x2="230" y2="179" stroke="#d2a8ff" stroke-width="3" marker-end="url(#aPurple)"/>
-  <text x="213" y="172" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#d2a8ff" opacity="0.8">~2μs</text>
-  <line x1="385" y1="179" x2="420" y2="179" stroke="#f0883e" stroke-width="3" marker-end="url(#aOrange)"/>
-  <text x="403" y="172" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">results</text>
+  <!-- TOP: Across the Network -->
+  <rect x="20" y="95" width="860" height="100" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" opacity="0.6"/>
+  <text x="40" y="117" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold" fill="#8b949e">Across the Network (slow, durable)</text>
 
-  <!-- External layer -->
-  <text x="25" y="232" font-family="sans-serif" font-size="10" fill="#8b949e">External (optional, pluggable)</text>
-  <rect x="25" y="239" width="670" height="68" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
-  <rect x="45" y="252" width="210" height="42" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="150" y="271" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Metrics / Traces</text>
-  <text x="150" y="287" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">via Hooks → OTel</text>
-  <rect x="460" y="252" width="210" height="42" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2.5" filter="url(#shadow)"/>
-  <text x="565" y="271" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#58a6ff">Idempotency Store</text>
-  <text x="565" y="287" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#8b949e">In-Memory / Redis / DB</text>
+  <rect x="300" y="130" width="300" height="50" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="153" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="14" font-weight="bold" fill="#3fb950">Amazon SQS</text>
+  <text x="450" y="170" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">Durability · Cross-Pod · HA</text>
 
-  <!-- Cross-layer arrows -->
-  <line x1="360" y1="113" x2="280" y2="153" stroke="#3fb950" stroke-width="2.5" marker-end="url(#aGreen)"/>
-  <text x="322" y="132" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#3fb950" opacity="0.8">batch receive ~10ms</text>
-  <path d="M 500 158 Q 500 140 480 120 Q 460 100 430 100 Q 395 100 375 115" stroke="#f0883e" stroke-width="2.5" stroke-dasharray="6 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
-  <text x="460" y="118" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#f0883e" opacity="0.7">batch delete ~5ms</text>
+  <!-- MIDDLE: Inside the Process -->
+  <rect x="20" y="215" width="700" height="200" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" opacity="0.6"/>
+  <text x="40" y="237" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold" fill="#8b949e">Inside the Process (fast, predictable)</text>
 
-  <!-- Dotted lines: emit hooks and check dedupe -->
-  <line x1="280" y1="200" x2="165" y2="247" stroke="#d2a8ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#aPurple)" opacity="0.6"/>
-  <text x="200" y="228" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">emit hooks</text>
-  <line x1="155" y1="200" x2="540" y2="247" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#aBlue)" opacity="0.6"/>
-  <text x="390" y="228" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">check dedupe</text>
+  <rect x="50" y="255" width="180" height="65" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="140" y="280" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
+  <text x="140" y="296" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Scheduling · Batching</text>
+  <text x="140" y="310" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Backpressure</text>
 
-  <!-- Design principle -->
-  <text x="360" y="340" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">SQS handles durability and delivery. Ring Buffer handles scheduling and concurrency.</text>
-  <text x="360" y="360" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">Neither does the other's job — batched network I/O, microsecond in-process dispatch.</text>
+  <rect x="270" y="255" width="180" height="65" rx="10" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="280" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
+  <text x="360" y="296" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Bounded Concurrency</text>
+  <text x="360" y="310" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">configurable workers</text>
+
+  <rect x="490" y="255" width="200" height="65" rx="10" fill="#161b22" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="590" y="280" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#f0883e">Ack Batcher</text>
+  <text x="590" y="296" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Batch DeleteMessages</text>
+  <text x="590" y="310" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">DLQ on failure</text>
+
+  <line x1="230" y1="288" x2="262" y2="288" stroke="#58a6ff" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <line x1="450" y1="288" x2="482" y2="288" stroke="#d2a8ff" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- RIGHT: External -->
+  <rect x="740" y="215" width="140" height="200" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" opacity="0.6"/>
+  <text x="810" y="237" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">External</text>
+  <text x="810" y="252" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">(optional)</text>
+
+  <!-- Metrics top -->
+  <rect x="755" y="268" width="110" height="55" rx="8" fill="#0d1a33" stroke="#58a6ff" stroke-width="1" opacity="0.8"/>
+  <text x="810" y="290" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" font-weight="bold" fill="#58a6ff">Metrics</text>
+  <text x="810" y="304" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" font-weight="bold" fill="#58a6ff">Traces</text>
+  <text x="810" y="318" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" fill="#484f58">Hooks → OTel</text>
+
+  <!-- Idempotency bottom -->
+  <rect x="755" y="338" width="110" height="55" rx="8" fill="#1a1520" stroke="#d2a8ff" stroke-width="1" opacity="0.8"/>
+  <text x="810" y="360" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Idempotency</text>
+  <text x="810" y="374" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Store</text>
+  <text x="810" y="388" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" fill="#484f58">Mem/Redis/DB</text>
+
+  <!-- SQS → Ring Buffer -->
+  <path d="M 450 180 L 450 225 Q 450 240 300 240 L 140 245" fill="none" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <text x="350" y="215" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">batch receive ~10ms</text>
+
+  <!-- Ack Batcher → SQS -->
+  <path d="M 590 255 L 590 225 Q 590 200 510 200 L 480 195" fill="none" stroke="#f0883e" stroke-width="2.5" marker-end="url(#arrowOrange)"/>
+  <text x="550" y="218" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">batch delete ~5ms</text>
+
+  <!-- Ring Buffer → Idempotency Store (dotted) -->
+  <path d="M 140 320 L 140 370 L 748 365" fill="none" stroke="#d2a8ff" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrowPurple)" opacity="0.5"/>
+  <text x="360" y="362" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.6">check dedupe</text>
+
+  <!-- Worker Pool → Metrics/Traces (dotted, routed below Ack Batcher) -->
+  <path d="M 360 320 L 360 350 L 748 350 L 748 295" fill="none" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrowBlue)" opacity="0.5"/>
+  <text x="555" y="343" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.6">emit hooks</text>
+
+  <!-- BOTTOM: Design principle -->
+  <rect x="130" y="445" width="640" height="80" rx="10" fill="#161b22" stroke="url(#ringGrad)" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="470" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#e6edf3">SQS handles what's hard about distributed systems</text>
+  <text x="450" y="488" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#e6edf3">Ring Buffer handles what's hard about local execution</text>
+  <text x="450" y="510" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#8b949e">Neither does the other's job → fast AND reliable</text>
 </svg>

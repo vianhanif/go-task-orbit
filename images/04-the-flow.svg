@@ -1,58 +1,108 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350" width="700" height="350">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a0e14"/>
-      <stop offset="100%" stop-color="#0d1117"/>
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
     </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
-    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
-    <marker id="aPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d2a8ff"/></marker>
-    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#f0883e"/></marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d2a8ff"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f0883e"/>
+    </marker>
   </defs>
-  <rect width="700" height="350" rx="12" fill="url(#bg)"/>
-  <text x="350" y="32" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">The Flow</text>
 
-  <!-- SQS Poller - left center -->
-  <rect x="20" y="85" width="140" height="55" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2" filter="url(#shadow)"/>
-  <text x="90" y="108" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#3fb950">SQS Poller</text>
-  <text x="90" y="125" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">batch ReceiveMessage</text>
+  <rect width="900" height="600" rx="16" fill="url(#bg)"/>
 
-  <!-- Ring Buffer - center -->
-  <rect x="220" y="115" width="150" height="65" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="295" y="143" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
-  <text x="295" y="163" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">write / read slots</text>
+  <text x="450" y="45" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="22" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">The Flow</text>
+  <text x="450" y="68" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="12" fill="#8b949e">SQS → Ring Buffer → Dispatcher → Worker Pool → Ack Batcher → SQS</text>
 
-  <!-- Dispatcher - right of center -->
-  <rect x="440" y="115" width="150" height="65" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="515" y="143" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Dispatcher</text>
-  <text x="515" y="163" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">batch dispatch</text>
+  <!-- Column headers -->
+  <rect x="40" y="90" width="140" height="40" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="110" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#3fb950">SQS Poller</text>
 
-  <!-- Worker Pool - right center -->
-  <rect x="440" y="210" width="150" height="65" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="515" y="238" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
-  <text x="515" y="258" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">bounded process</text>
+  <rect x="210" y="90" width="140" height="40" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="280" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#58a6ff">Ring Buffer</text>
 
-  <!-- Results - center -->
-  <rect x="285" y="210" width="120" height="65" rx="8" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
-  <text x="345" y="238" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#f0883e">Results</text>
-  <text x="345" y="258" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Ack/Retry/DLQ</text>
+  <rect x="380" y="90" width="140" height="40" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Dispatcher</text>
 
-  <!-- Ack Batcher - left center -->
-  <rect x="20" y="210" width="140" height="55" rx="8" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
-  <text x="90" y="233" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#f0883e">Ack Batcher</text>
-  <text x="90" y="250" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">DeleteMessageBatch</text>
+  <rect x="550" y="90" width="140" height="40" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="620" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Worker Pool</text>
 
-  <!-- Arrows -->
-  <line x1="160" y1="112" x2="215" y2="138" stroke="#58a6ff" stroke-width="3" marker-end="url(#aBlue)"/>
-  <text x="188" y="108" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#58a6ff">EnqueueBatch</text>
-  <line x1="370" y1="147" x2="435" y2="147" stroke="#d2a8ff" stroke-width="3" marker-end="url(#aPurple)"/>
-  <text x="403" y="140" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d2a8ff">ReadBatch</text>
-  <line x1="515" y1="180" x2="515" y2="205" stroke="#d2a8ff" stroke-width="3" marker-end="url(#aPurple)"/>
-  <text x="532" y="195" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d2a8ff">SubmitBatch</text>
-  <line x1="440" y1="242" x2="410" y2="242" stroke="#f0883e" stroke-width="3" marker-end="url(#aOrange)"/>
-  <text x="425" y="235" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#f0883e">results</text>
+  <rect x="720" y="90" width="140" height="40" rx="8" fill="#161b22" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="790" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#f0883e">Ack Batcher</text>
 
-  <!-- DeleteMessageBatch -->
-  <path d="M 285 242 L 165 242 Q 160 242 160 237 L 160 155" stroke="#f0883e" stroke-width="2.5" stroke-dasharray="7 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
-  <text x="223" y="237" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#f0883e" opacity="0.7">DeleteMessageBatch</text>
+  <!-- Lifelines -->
+  <line x1="110" y1="130" x2="110" y2="540" stroke="#3fb950" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+  <line x1="280" y1="130" x2="280" y2="540" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+  <line x1="450" y1="130" x2="450" y2="540" stroke="#d2a8ff" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+  <line x1="620" y1="130" x2="620" y2="540" stroke="#d2a8ff" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+  <line x1="790" y1="130" x2="790" y2="540" stroke="#f0883e" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+
+  <!-- Step 1 -->
+  <text x="10" y="165" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">1</text>
+  <rect x="58" y="152" width="104" height="22" rx="5" fill="#3fb950" opacity="0.12"/>
+  <text x="110" y="168" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#3fb950">ReceiveMessage</text>
+
+  <!-- Step 2 -->
+  <text x="10" y="200" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">2</text>
+  <line x1="110" y1="195" x2="270" y2="195" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="195" y="188" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">EnqueueBatch</text>
+  <rect x="240" y="200" width="80" height="28" rx="5" fill="#58a6ff" opacity="0.08"/>
+  <text x="280" y="215" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">write slots</text>
+  <text x="280" y="227" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">adv head</text>
+
+  <!-- Step 3 -->
+  <text x="10" y="260" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">3</text>
+  <line x1="450" y1="245" x2="290" y2="245" stroke="#d2a8ff" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="370" y="238" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">ReadBatch</text>
+  <rect x="240" y="250" width="80" height="28" rx="5" fill="#58a6ff" opacity="0.08"/>
+  <text x="280" y="265" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">read N slots</text>
+  <text x="280" y="277" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">adv tail</text>
+
+  <!-- Step 4 -->
+  <text x="10" y="310" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">4</text>
+  <line x1="450" y1="305" x2="610" y2="305" stroke="#d2a8ff" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="535" y="298" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">SubmitBatch</text>
+  <rect x="580" y="315" width="80" height="30" rx="5" fill="#d2a8ff" opacity="0.08"/>
+  <text x="620" y="330" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">bounded workers</text>
+  <text x="620" y="342" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">process messages</text>
+
+  <!-- Step 5 -->
+  <text x="10" y="380" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">5</text>
+  <line x1="620" y1="375" x2="780" y2="375" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="700" y="368" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">collect results (Ack/Retry/DLQ)</text>
+
+  <!-- Step 6 -->
+  <text x="10" y="430" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">6</text>
+  <path d="M 720 420 L 120 420" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="450" y="413" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">DeleteMessageBatch</text>
+
+  <!-- Step 7 -->
+  <text x="10" y="470" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e" opacity="0.6">7</text>
+  <path d="M 720 460 L 120 460" stroke="#f85149" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowBlue)"/>
+  <text x="450" y="453" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.7">SendMessage (DLQ — on failure)</text>
+
+  <!-- Legend -->
+  <rect x="40" y="510" width="820" height="70" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.6"/>
+  <text x="55" y="530" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">~10ms</text>
+  <text x="55" y="545" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">batch latency</text>
+  <text x="185" y="530" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">~2μs</text>
+  <text x="185" y="545" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">ring dispatch</text>
+  <text x="325" y="530" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">bounded concurrency</text>
+  <text x="325" y="545" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">configurable pool</text>
+  <text x="505" y="530" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">Ack · Retry · DLQ</text>
+  <text x="505" y="545" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">explicit Result type</text>
+  <text x="670" y="530" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#8b949e">~5ms</text>
+  <text x="670" y="545" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">batch delete</text>
 </svg>

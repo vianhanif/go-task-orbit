@@ -1,73 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 420" width="620" height="420">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a0e14"/>
-      <stop offset="100%" stop-color="#0d1117"/>
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
     </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
-    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
-    <marker id="aGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3fb950"/></marker>
-    <marker id="aOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#f0883e"/></marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f0883e"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d2a8ff"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f85149"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/>
+    </marker>
   </defs>
-  <rect width="620" height="420" rx="12" fill="url(#bg)"/>
-  <text x="310" y="32" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">Backpressure Policies</text>
 
-  <!-- Producer - center top -->
-  <rect x="220" y="55" width="180" height="50" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="310" y="78" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#58a6ff">Producer: Enqueue msg</text>
-  <text x="310" y="95" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Enqueue →</text>
+  <rect width="800" height="560" rx="16" fill="url(#bg)"/>
 
-  <!-- Buffer full? - diamond -->
-  <polygon points="310,125 250,148 310,171 370,148" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
-  <text x="310" y="152" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#f0883e">Buffer full?</text>
+  <text x="400" y="45" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="22" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">Backpressure Policies</text>
+  <text x="400" y="68" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="12" fill="#8b949e">configurable overflow behavior when ring buffer is full</text>
 
-  <!-- Arrow from Producer to Buffer full -->
-  <line x1="310" y1="105" x2="310" y2="121" stroke="#58a6ff" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <rect x="310" y="95" width="180" height="45" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="115" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#58a6ff">Producer</text>
+  <text x="400" y="132" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">Enqueue(msg)</text>
 
-  <!-- No branch - left -->
-  <line x1="250" y1="148" x2="130" y2="148" stroke="#8b949e" stroke-width="2"/>
-  <line x1="130" y1="148" x2="130" y2="198" stroke="#3fb950" stroke-width="2.5" marker-end="url(#aGreen)"/>
-  <text x="190" y="142" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">No</text>
-  <rect x="55" y="202" width="150" height="45" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2" filter="url(#shadow)"/>
-  <text x="130" y="229" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#3fb950">Write to slot</text>
+  <line x1="400" y1="140" x2="400" y2="170" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
 
-  <!-- Yes branch - right -->
-  <line x1="370" y1="148" x2="490" y2="148" stroke="#8b949e" stroke-width="2"/>
-  <line x1="490" y1="148" x2="490" y2="198" stroke="#f0883e" stroke-width="2.5" marker-end="url(#aOrange)"/>
-  <text x="430" y="142" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Yes</text>
+  <polygon points="400,175 480,220 400,265 320,220" fill="#161b22" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="224" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#f0883e">Buffer full?</text>
 
-  <!-- Overflow Policy - diamond -->
-  <polygon points="490,222 450,242 490,262 530,242" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#shadow)"/>
-  <text x="490" y="240" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#f0883e">Overflow</text>
-  <text x="490" y="254" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#f0883e">Policy</text>
+  <line x1="320" y1="220" x2="160" y2="220" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="240" y="213" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#3fb950">No</text>
 
-  <!-- Branch lines from overflow policy -->
-  <line x1="450" y1="242" x2="450" y2="288" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aBlue)"/>
-  <line x1="490" y1="262" x2="490" y2="288" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aBlue)"/>
-  <line x1="530" y1="242" x2="530" y2="288" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aBlue)"/>
-  <line x1="570" y1="242" x2="570" y2="288" stroke="#d2a8ff" stroke-width="2" marker-end="url(#aBlue)"/>
-  <line x1="450" y1="288" x2="570" y2="288" stroke="#d2a8ff" stroke-width="1.5"/>
+  <rect x="40" y="195" width="120" height="50" rx="8" fill="#0f1a10" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="100" y="218" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#3fb950">Write to slot</text>
+  <text x="100" y="235" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">normal path</text>
 
-  <!-- 4 policy boxes - aligned row -->
-  <rect x="20" y="300" width="135" height="55" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="87" y="325" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Block</text>
-  <text x="87" y="342" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Wait for slot</text>
-  <rect x="165" y="300" width="135" height="55" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="232" y="325" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">DropNewest</text>
-  <text x="232" y="342" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Discard incoming</text>
-  <rect x="310" y="300" width="135" height="55" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="377" y="325" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">DropOldest</text>
-  <text x="377" y="342" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Overwrite oldest</text>
-  <rect x="455" y="300" width="135" height="55" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="522" y="325" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Reject</text>
-  <text x="522" y="342" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#8b949e">Return error</text>
+  <line x1="400" y1="265" x2="400" y2="300" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="413" y="285" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold" fill="#f0883e">Yes</text>
 
-  <!-- Vertical connectors from overflow to each box -->
-  <line x1="87" y1="288" x2="87" y2="296" stroke="#d2a8ff" stroke-width="2"/>
-  <line x1="232" y1="288" x2="232" y2="296" stroke="#d2a8ff" stroke-width="2"/>
-  <line x1="377" y1="288" x2="377" y2="296" stroke="#d2a8ff" stroke-width="2"/>
-  <line x1="522" y1="288" x2="522" y2="296" stroke="#d2a8ff" stroke-width="2"/>
+  <polygon points="400,305 470,345 400,385 330,345" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="348" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Overflow Policy</text>
 
-  <!-- Caption -->
-  <text x="310" y="390" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#8b949e">Go channels can only Block. The ring buffer supports all four policies.</text>
+  <line x1="330" y1="345" x2="95" y2="440" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <line x1="355" y1="375" x2="285" y2="440" stroke="#f85149" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <line x1="400" y1="385" x2="400" y2="430" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <line x1="400" y1="430" x2="485" y2="440" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <line x1="445" y1="375" x2="685" y2="440" stroke="#d2a8ff" stroke-width="2" marker-end="url(#arrowPurple)"/>
+
+  <rect x="20" y="450" width="150" height="65" rx="8" fill="#0d1a33" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="95" y="475" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#58a6ff">Block</text>
+  <text x="95" y="494" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#58a6ff" opacity="0.7">Wait for consumer</text>
+  <text x="95" y="507" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#484f58">to free a slot</text>
+
+  <rect x="210" y="450" width="150" height="65" rx="8" fill="#3d1414" stroke="#f85149" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="285" y="475" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#f85149">DropNewest</text>
+  <text x="285" y="494" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#f85149" opacity="0.7">Discard incoming</text>
+  <text x="285" y="507" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#484f58">+ drop counter</text>
+
+  <rect x="410" y="450" width="150" height="65" rx="8" fill="#1a120a" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="485" y="475" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#f0883e">DropOldest</text>
+  <text x="485" y="494" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#f0883e" opacity="0.7">Overwrite oldest</text>
+  <text x="485" y="507" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#484f58">+ advance tail</text>
+
+  <rect x="610" y="450" width="150" height="65" rx="8" fill="#1a1520" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="685" y="475" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Reject</text>
+  <text x="685" y="494" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#d2a8ff" opacity="0.7">Return error</text>
+  <text x="685" y="507" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#484f58">to caller</text>
 </svg>

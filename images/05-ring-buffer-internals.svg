@@ -1,54 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 260" width="620" height="260">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a0e14"/>
-      <stop offset="100%" stop-color="#0d1117"/>
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
     </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/></filter>
-    <marker id="aBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
-    <marker id="aPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d2a8ff"/></marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+    </marker>
   </defs>
-  <rect width="620" height="260" rx="12" fill="url(#bg)"/>
-  <text x="310" y="32" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="15" font-weight="bold" fill="#e6edf3">Ring Buffer Internals</text>
 
-  <!-- Border -->
-  <rect x="12" y="48" width="596" height="198" rx="8" fill="none" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <rect width="800" height="380" rx="16" fill="url(#bg)"/>
 
-  <!-- Head Cursor - left -->
-  <rect x="30" y="85" width="140" height="55" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="100" y="108" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#58a6ff">Head Cursor</text>
-  <text x="100" y="125" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">atomic.Uint64</text>
+  <text x="400" y="45" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="22" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">Ring Buffer Internals</text>
+  <text x="400" y="68" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="12" fill="#8b949e">power-of-two sizing · atomic head/tail cursors · lock-free concurrent access</text>
 
-  <!-- Slots - center row, aligned -->
-  <rect x="200" y="75" width="72" height="55" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="236" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#58a6ff">Slot 0</text>
-  <text x="236" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 42</text>
-  <text x="236" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
-  <rect x="278" y="75" width="72" height="55" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="314" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#3fb950">Slot 1</text>
-  <text x="314" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 43</text>
-  <text x="314" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
-  <rect x="356" y="75" width="72" height="55" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="392" y="95" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="9" font-weight="bold" fill="#d2a8ff">Slot 2</text>
-  <text x="392" y="108" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">seq: 44</text>
-  <text x="392" y="120" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">msg ref</text>
-  <rect x="434" y="75" width="72" height="55" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" stroke-dasharray="4 2" filter="url(#shadow)"/>
-  <text x="470" y="100" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">Slot 3</text>
-  <text x="470" y="118" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">empty</text>
-  <rect x="512" y="75" width="50" height="55" rx="6" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="4 2"/>
-  <text x="537" y="105" text-anchor="middle" font-family="monospace" font-size="18" fill="#8b949e">...</text>
+  <rect x="30" y="100" width="160" height="230" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="110" y="128" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold" fill="#58a6ff">Write Side</text>
+  <text x="110" y="145" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">(Producer)</text>
+  <rect x="50" y="165" width="120" height="45" rx="8" fill="#0d1a33" stroke="#58a6ff" stroke-width="1" opacity="0.8"/>
+  <text x="110" y="185" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#58a6ff">Head Cursor</text>
+  <text x="110" y="202" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#58a6ff" opacity="0.7">atomic.Uint64</text>
 
-  <!-- Tail Cursor - left bottom -->
-  <rect x="30" y="160" width="140" height="55" rx="8" fill="#161b22" stroke="#d2a8ff" stroke-width="2" filter="url(#shadow)"/>
-  <text x="100" y="183" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" font-weight="bold" fill="#d2a8ff">Tail Cursor</text>
-  <text x="100" y="200" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="9" fill="#8b949e">atomic.Uint64</text>
+  <line x1="170" y1="188" x2="220" y2="170" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
 
-  <!-- Arrows -->
-  <line x1="170" y1="112" x2="195" y2="95" stroke="#58a6ff" stroke-width="2.5" marker-end="url(#aBlue)"/>
-  <text x="183" y="88" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#58a6ff" opacity="0.8">write</text>
-  <line x1="170" y1="187" x2="195" y2="140" stroke="#d2a8ff" stroke-width="2.5" marker-end="url(#aPurple)"/>
-  <text x="183" y="165" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#d2a8ff" opacity="0.8">read</text>
+  <rect x="220" y="100" width="360" height="230" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="122" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold" fill="#e6edf3">Slots</text>
 
-  <!-- Caption -->
-  <text x="310" y="240" text-anchor="middle" font-family="SF Mono,Menlo,Consolas,monospace" font-size="10" fill="#8b949e">Power-of-two sizing: index = sequence &amp; mask (bitwise AND, no division)</text>
+  <rect x="235" y="140" width="160" height="45" rx="6" fill="#0d1a33" stroke="#58a6ff" stroke-width="1" opacity="0.7"/>
+  <text x="315" y="158" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#58a6ff">Slot 0</text>
+  <text x="315" y="175" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">seq: 42 · msg ref</text>
+
+  <rect x="235" y="195" width="160" height="45" rx="6" fill="#0f1a10" stroke="#3fb950" stroke-width="1" opacity="0.7"/>
+  <text x="315" y="213" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#3fb950">Slot 1</text>
+  <text x="315" y="230" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">seq: 43 · msg ref</text>
+
+  <rect x="235" y="250" width="160" height="45" rx="6" fill="#1a1520" stroke="#d2a8ff" stroke-width="1" opacity="0.7"/>
+  <text x="315" y="268" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Slot 2</text>
+  <text x="315" y="285" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">seq: 44 · msg ref</text>
+
+  <rect x="410" y="140" width="155" height="45" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+  <text x="487" y="166" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" fill="#8b949e">Slot 3</text>
+  <text x="487" y="180" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#484f58">empty</text>
+
+  <rect x="410" y="200" width="155" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.3"/>
+  <text x="487" y="225" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" fill="#8b949e" opacity="0.5">Slot 4</text>
+
+  <rect x="410" y="250" width="155" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.2"/>
+  <text x="487" y="275" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" fill="#8b949e" opacity="0.4">Slot 5...</text>
+
+  <rect x="610" y="100" width="160" height="230" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="690" y="128" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold" fill="#3fb950">Read Side</text>
+  <text x="690" y="145" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8b949e">(Consumer)</text>
+  <rect x="630" y="165" width="120" height="45" rx="8" fill="#0f1a10" stroke="#3fb950" stroke-width="1" opacity="0.8"/>
+  <text x="690" y="185" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#3fb950">Tail Cursor</text>
+  <text x="690" y="202" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#3fb950" opacity="0.7">atomic.Uint64</text>
+
+  <path d="M 395 273 L 600 273 L 620 200" fill="none" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <text x="218" y="155" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">write at</text>
+  <text x="218" y="278" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">read at</text>
+
+  <rect x="230" y="315" width="340" height="40" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="400" y="335" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="10" fill="#8b949e">seq &amp; mask → index</text>
+  <text x="400" y="350" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#484f58">bitwise AND = cheap modulo (no division)</text>
 </svg>
