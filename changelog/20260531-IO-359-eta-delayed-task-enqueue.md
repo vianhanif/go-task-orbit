@@ -30,16 +30,16 @@ Current pipeline processes messages immediately upon receipt. Many use cases req
 Without ETA support, callers must implement their own scheduling layer outside the worker library.
 
 #### Success criteria
-- [ ] `ringq.Message.NotBefore` field (`time.Duration`) for ETA delay
-- [ ] Hashed wheel timer (`internal/timerwheel/`) with 1-second tick precision
-- [ ] Messages with `NotBefore > 0` held in timer wheel until expiry
-- [ ] Expired messages automatically inserted into ring buffer for processing
-- [ ] `NotBefore <= 0` returns error on enqueue
-- [ ] Works across all transports: SQS, Pub/Sub, In-Memory
-- [ ] For backed transports: visibility timeout / ack deadline extended while waiting
-- [ ] On pod restart: SQS/Pub/Sub redeliver (visibility expired), timer wheel re-queues
-- [ ] Graceful shutdown drains timer wheel to ring buffer
-- [ ] Exponential backoff as default retry strategy (base * 2^attempt, max 10 retries)
+- [x] `ringq.Message.NotBefore` field (`time.Duration`) for ETA delay
+- [x] Hashed wheel timer (`internal/timerwheel/`) with 1-second tick precision
+- [x] Messages with `NotBefore > 0` held in timer wheel until expiry
+- [x] Expired messages automatically inserted into ring buffer for processing
+- [x] `NotBefore <= 0` returns error on enqueue
+- [x] Works across all transports: SQS, Pub/Sub, In-Memory
+- [x] For backed transports: visibility timeout / ack deadline extended while waiting
+- [x] On pod restart: SQS/Pub/Sub redeliver (visibility expired), timer wheel re-queues
+- [x] Graceful shutdown drains timer wheel to ring buffer
+- [x] Exponential backoff as default retry strategy (base * 2^attempt, max 10 retries)
 - [ ] E2E tests for ETA delay with each transport
 
 ---
