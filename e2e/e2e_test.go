@@ -47,6 +47,7 @@ func TestE2EHappyPath(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("pipeline started, waiting for poller...")
 	time.Sleep(500 * time.Millisecond)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -56,6 +57,7 @@ func TestE2EHappyPath(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
+	t.Log("message published: hello")
 
 	time.Sleep(5 * time.Second)
 	cancel()
@@ -63,6 +65,7 @@ func TestE2EHappyPath(t *testing.T) {
 	if n := atomic.LoadInt32(&called); n != 1 {
 		t.Errorf("expected 1 handler call, got %d", n)
 	}
+	t.Logf("handler called %d times — acked via DeleteMessageBatch", atomic.LoadInt32(&called))
 	env.cleanup(t)
 }
 
@@ -89,6 +92,7 @@ func TestE2ERetryThenAck(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("retry pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -98,6 +102,7 @@ func TestE2ERetryThenAck(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
+	t.Log("message published: retry-me")
 
 	time.Sleep(8 * time.Second)
 	cancel()
@@ -105,6 +110,7 @@ func TestE2ERetryThenAck(t *testing.T) {
 	if n := atomic.LoadInt32(&attempt); n != 2 {
 		t.Errorf("expected 2 attempts, got %d", n)
 	}
+	t.Logf("handler called %d times — failed on 1st, succeeded on 2nd", atomic.LoadInt32(&attempt))
 	env.cleanup(t)
 }
 
@@ -132,6 +138,7 @@ func TestE2EDLQ(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("DLQ pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -141,6 +148,7 @@ func TestE2EDLQ(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
+	t.Log("message published: fail → expecting DLQ routing")
 
 	time.Sleep(5 * time.Second)
 	cancel()
@@ -148,6 +156,7 @@ func TestE2EDLQ(t *testing.T) {
 	if n := atomic.LoadInt32(&dlqCalled); n < 1 {
 		t.Errorf("expected at least 1 OnError call for DLQ, got %d", n)
 	}
+	t.Logf("OnError hook fired %d times — message routed to DLQ", atomic.LoadInt32(&dlqCalled))
 	env.cleanup(t)
 }
 
@@ -176,6 +185,7 @@ func TestE2EIdempotency(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("idempotency pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -186,6 +196,7 @@ func TestE2EIdempotency(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish 1: %v", err)
 	}
+	t.Log("published 1st message (key=dup-key)")
 	time.Sleep(3 * time.Second)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -196,12 +207,14 @@ func TestE2EIdempotency(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish 2: %v", err)
 	}
+	t.Log("published 2nd message (same key=dup-key)")
 	time.Sleep(5 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&called); n != 1 {
 		t.Errorf("expected 1 handler call (duplicate filtered), got %d", n)
 	}
+	t.Logf("handler called %d times — duplicate message was filtered and acked silently", atomic.LoadInt32(&called))
 	env.cleanup(t)
 }
 
@@ -225,6 +238,7 @@ func TestE2EBatchReceive(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("batch pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 
 	for i := 0; i < 5; i++ {
@@ -236,6 +250,7 @@ func TestE2EBatchReceive(t *testing.T) {
 			t.Fatalf("publish %d: %v", i, err)
 		}
 	}
+	t.Log("published 5 messages")
 
 	time.Sleep(5 * time.Second)
 	cancel()
@@ -243,6 +258,7 @@ func TestE2EBatchReceive(t *testing.T) {
 	if n := atomic.LoadInt32(&count); n != 5 {
 		t.Errorf("expected 5 messages processed, got %d", n)
 	}
+	t.Logf("all %d messages processed and acked", atomic.LoadInt32(&count))
 	env.cleanup(t)
 }
 
@@ -267,7 +283,7 @@ func TestE2EGracefulShutdown(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go p.Run(ctx)
-
+	t.Log("shutdown pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
@@ -276,13 +292,16 @@ func TestE2EGracefulShutdown(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
+	t.Log("published slow message, waiting for handler to start...")
 
 	time.Sleep(3 * time.Second)
 	cancel()
+	t.Log("context cancelled, waiting for graceful drain...")
 
 	if n := atomic.LoadInt32(&started); n != 1 {
 		t.Errorf("expected handler to have started before shutdown")
 	}
+	t.Log("handler started before shutdown — completing inflight work")
 
 	close(block)
 	time.Sleep(500 * time.Millisecond)
@@ -313,6 +332,7 @@ func TestE2EUnknownTopic(t *testing.T) {
 	defer cancel()
 
 	go p.Run(ctx)
+	t.Log("unknown topic pipeline started...")
 	time.Sleep(500 * time.Millisecond)
 
 	if err := transport.Publish(ctx, ringq.Message{
@@ -322,6 +342,7 @@ func TestE2EUnknownTopic(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
+	t.Log("published message to unregistered topic 'unknown'")
 
 	time.Sleep(5 * time.Second)
 	cancel()
@@ -329,5 +350,6 @@ func TestE2EUnknownTopic(t *testing.T) {
 	if n := atomic.LoadInt32(&errCalled); n < 1 {
 		t.Errorf("expected at least 1 OnError call for unknown topic, got %d", n)
 	}
+	t.Logf("OnError hook fired %d times — unknown topic message routed to DLQ", atomic.LoadInt32(&errCalled))
 	env.cleanup(t)
 }
