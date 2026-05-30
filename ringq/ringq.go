@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -18,9 +17,10 @@ var (
 )
 
 type handlerEntry struct {
-	fn        DispatchFunc
-	maxRetries int
-	baseDelay  time.Duration
+	fn          DispatchFunc
+	maxRetries  int
+	baseDelay   time.Duration
+	coordinator RetryCoordinator
 }
 
 type runtime struct {
@@ -59,15 +59,16 @@ func (p *Pipeline) Transport(t Transport) *Pipeline {
 }
 
 func (p *Pipeline) Handle(topic string, fn DispatchFunc) *Pipeline {
-	return p.HandleWithRetry(topic, fn, 3, 5*time.Second)
+	return p.HandleWithRetry(topic, fn, 3, 5*time.Second, nil)
 }
 
-func (p *Pipeline) HandleWithRetry(topic string, fn DispatchFunc, maxRetries int, baseDelay time.Duration) *Pipeline {
+func (p *Pipeline) HandleWithRetry(topic string, fn DispatchFunc, maxRetries int, baseDelay time.Duration, coordinator RetryCoordinator) *Pipeline {
 	p.mu.Lock()
 	p.handlers[topic] = handlerEntry{
-		fn:         fn,
-		maxRetries: maxRetries,
-		baseDelay:  baseDelay,
+		fn:          fn,
+		maxRetries:  maxRetries,
+		baseDelay:   baseDelay,
+		coordinator: coordinator,
 	}
 	p.mu.Unlock()
 	return p
@@ -136,11 +137,15 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		idemFilter: idemFilter,
 	}
 
+	pollCtx, pollCancel := context.WithCancel(ctx)
+
 	var pollerWg sync.WaitGroup
 	pollerWg.Add(1)
 	go func() {
 		defer pollerWg.Done()
-		rt.runPoller(ctx)
+		if err := rt.runPoller(pollCtx); err != nil {
+			pollCancel()
+		}
 	}()
 
 	dispCtx, dispCancel := context.WithCancel(ctx)
@@ -151,7 +156,10 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		rt.runDispatcher(dispCtx)
 	}()
 
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+	case <-pollCtx.Done():
+	}
 
 	dispCancel()
 	dispWg.Wait()
@@ -171,24 +179,19 @@ func (p *Pipeline) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (r *runtime) runPoller(ctx context.Context) {
-	err := r.transport.Subscribe(ctx, func(subCtx context.Context, msgs []Message) error {
+func (r *runtime) runPoller(ctx context.Context) error {
+	return r.transport.Subscribe(ctx, func(subCtx context.Context, msgs []Message) error {
 		if r.hooks.OnReceive != nil {
 			r.hooks.OnReceive(subCtx, len(msgs))
 		}
-		if r.hooks.OnDispatch != nil {
-			for _, m := range msgs {
+		for _, m := range msgs {
+			if r.hooks.OnDispatch != nil {
 				r.hooks.OnDispatch(subCtx, m.Topic)
 			}
-		}
-		for _, m := range msgs {
 			r.ringBuf.Enqueue(m)
 		}
 		return nil
 	})
-	if err != nil && err != context.Canceled {
-		log.Printf("ringq: transport subscribe error: %v", err)
-	}
 }
 
 func (r *runtime) runDispatcher(ctx context.Context) {
@@ -229,7 +232,11 @@ func (r *runtime) dispatchBatch(ctx context.Context, batch []interface{}) {
 	}
 
 	if r.idemFilter != nil {
-		messages = r.idemFilter.filter(ctx, messages)
+		filtered, duplicates := r.idemFilter.filterDuplicates(ctx, messages)
+		messages = filtered
+		for _, dup := range duplicates {
+			r.transport.Ack(ctx, []Message{dup})
+		}
 	}
 
 	var wg sync.WaitGroup
@@ -261,62 +268,83 @@ func (r *runtime) processMessage(ctx context.Context, msg Message, entry handler
 
 	r.hooks.fireOnComplete(ctx, msg.Topic, time.Since(start))
 
-	switch result.Action {
+	outcome := r.resolveOutcome(ctx, msg, entry, result)
+
+	switch outcome.Action {
 	case Ack:
-		if err := r.transport.Ack(ctx, []Message{msg}); err != nil {
+		if err := r.transport.Ack(ctx, []Message{outcome.Message}); err != nil {
 			r.hooks.fireOnError(ctx, msg.Topic, err)
 		}
 		if r.idemFilter != nil {
-			r.idemFilter.mark(ctx, msg)
+			r.idemFilter.mark(ctx, outcome.Message)
 		}
 
 	case Retry:
-		r.handleRetry(ctx, msg, entry, result)
+		r.hooks.fireOnRetry(ctx, msg.Topic, outcome.Message, outcome.Message.Attempts)
+		r.ringBuf.Enqueue(outcome.Message)
 
 	case RetryWithDelay:
-		r.handleRetry(ctx, msg, entry, result)
+		r.hooks.fireOnRetry(ctx, msg.Topic, outcome.Message, outcome.Message.Attempts)
+		r.transport.Nack(ctx, outcome.Message, outcome.Delay)
 
 	case DLQ:
-		r.sendToDLQ(ctx, msg, result.Err)
+		r.hooks.fireOnError(ctx, msg.Topic, outcome.Err)
+		if dlqErr := r.transport.SendToDLQ(ctx, outcome.Message); dlqErr != nil {
+			r.hooks.fireOnError(ctx, msg.Topic, fmt.Errorf("dlq: send failed: %w", dlqErr))
+			return
+		}
+		r.transport.Ack(ctx, []Message{outcome.Message})
 	}
 }
 
-func (r *runtime) handleRetry(ctx context.Context, msg Message, entry handlerEntry, result Result) {
-	attempt := msg.Attempts + 1
-	if attempt > entry.maxRetries {
-		err := fmt.Errorf("retry: max retries (%d) exceeded: %w", entry.maxRetries, result.Err)
-		r.hooks.fireOnError(ctx, msg.Topic, err)
-		r.sendToDLQ(ctx, msg, err)
-		return
+func (r *runtime) resolveOutcome(ctx context.Context, msg Message, entry handlerEntry, result Result) RetryOutcome {
+	if entry.coordinator != nil {
+		return entry.coordinator.Handle(ctx, msg, result)
 	}
+	return defaultRetryCoordinator{maxRetries: entry.maxRetries, baseDelay: entry.baseDelay}.Handle(ctx, msg, result)
+}
 
-	msg.Attempts = attempt
-	r.hooks.fireOnRetry(ctx, msg.Topic, attempt)
+type defaultRetryCoordinator struct {
+	maxRetries int
+	baseDelay  time.Duration
+}
 
+func (d defaultRetryCoordinator) Handle(_ context.Context, msg Message, result Result) RetryOutcome {
 	switch result.Action {
-	case Retry:
-		r.ringBuf.Enqueue(msg)
-	case RetryWithDelay:
+	case Ack:
+		return RetryOutcome{Action: Ack, Message: msg}
+
+	case Retry, RetryWithDelay:
+		attempt := msg.Attempts + 1
+		if attempt > d.maxRetries {
+			return RetryOutcome{
+				Action:  DLQ,
+				Message: msg,
+				Err:     fmt.Errorf("retry: max retries (%d) exceeded: %w", d.maxRetries, result.Err),
+			}
+		}
+		msg.Attempts = attempt
 		delay := result.Delay
 		if delay <= 0 {
-			delay = entry.baseDelay
+			delay = d.baseDelay
 		}
-		r.transport.Nack(ctx, msg, delay)
+		return RetryOutcome{Action: result.Action, Message: msg, Delay: delay}
+
+	case DLQ:
+		return RetryOutcome{Action: DLQ, Message: msg, Err: result.Err}
+
+	default:
+		return RetryOutcome{Action: DLQ, Message: msg, Err: fmt.Errorf("retry: unknown action %v", result.Action)}
 	}
 }
 
 func (r *runtime) handleUnknownTopic(ctx context.Context, msg Message) {
-	r.hooks.fireOnError(ctx, msg.Topic, fmt.Errorf("ringq: no handler for topic %q", msg.Topic))
-	r.transport.SendToDLQ(ctx, msg)
-	r.transport.Ack(ctx, []Message{msg})
-}
+	err := fmt.Errorf("ringq: no handler for topic %q", msg.Topic)
+	r.hooks.fireOnError(ctx, msg.Topic, err)
 
-func (r *runtime) sendToDLQ(ctx context.Context, msg Message, err error) {
-	if err != nil {
-		r.hooks.fireOnError(ctx, msg.Topic, err)
-	}
 	if dlqErr := r.transport.SendToDLQ(ctx, msg); dlqErr != nil {
 		r.hooks.fireOnError(ctx, msg.Topic, fmt.Errorf("dlq: send failed: %w", dlqErr))
+		return
 	}
 	r.transport.Ack(ctx, []Message{msg})
 }
@@ -333,8 +361,8 @@ func (h Hooks) fireOnError(ctx context.Context, topic string, err error) {
 	}
 }
 
-func (h Hooks) fireOnRetry(ctx context.Context, topic string, attempt int) {
+func (h Hooks) fireOnRetry(ctx context.Context, topic string, msg Message, attempt int) {
 	if h.OnRetry != nil {
-		h.OnRetry(ctx, topic, attempt)
+		h.OnRetry(ctx, topic, msg, attempt)
 	}
 }

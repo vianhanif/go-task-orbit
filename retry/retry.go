@@ -9,13 +9,13 @@ import (
 )
 
 type Config struct {
-	MaxRetries    int
-	BaseDelay     time.Duration
-	OnRetry       func(ctx context.Context, msg ringq.Message, attempt int)
-	OnDLQ         func(ctx context.Context, msg ringq.Message, err error)
+	MaxRetries int
+	BaseDelay  time.Duration
+	OnRetry    func(ctx context.Context, msg ringq.Message, attempt int)
+	OnDLQ      func(ctx context.Context, msg ringq.Message, err error)
 }
 
-func (c *Config) defaults() {
+func (c *Config) Defaults() {
 	if c.MaxRetries == 0 {
 		c.MaxRetries = 3
 	}
@@ -25,30 +25,18 @@ func (c *Config) defaults() {
 }
 
 type Coordinator struct {
-	config   Config
+	config Config
 }
 
 func NewCoordinator(cfg Config) *Coordinator {
-	cfg.defaults()
-	return &Coordinator{
-		config: cfg,
-	}
+	cfg.Defaults()
+	return &Coordinator{config: cfg}
 }
 
-type Outcome struct {
-	Action  ringq.Action
-	Message ringq.Message
-	Delay   time.Duration
-	Err     error
-}
-
-func (c *Coordinator) Handle(ctx context.Context, msg ringq.Message, result ringq.Result) Outcome {
+func (c *Coordinator) Handle(ctx context.Context, msg ringq.Message, result ringq.Result) ringq.RetryOutcome {
 	switch result.Action {
 	case ringq.Ack:
-		return Outcome{
-			Action:  ringq.Ack,
-			Message: msg,
-		}
+		return ringq.RetryOutcome{Action: ringq.Ack, Message: msg}
 
 	case ringq.Retry:
 		attempt := msg.Attempts + 1
@@ -57,21 +45,13 @@ func (c *Coordinator) Handle(ctx context.Context, msg ringq.Message, result ring
 			if c.config.OnDLQ != nil {
 				c.config.OnDLQ(ctx, msg, err)
 			}
-			return Outcome{
-				Action:  ringq.DLQ,
-				Message: msg,
-				Err:     err,
-			}
+			return ringq.RetryOutcome{Action: ringq.DLQ, Message: msg, Err: err}
 		}
 		msg.Attempts = attempt
 		if c.config.OnRetry != nil {
 			c.config.OnRetry(ctx, msg, attempt)
 		}
-		return Outcome{
-			Action:  ringq.Retry,
-			Message: msg,
-			Delay:   0,
-		}
+		return ringq.RetryOutcome{Action: ringq.Retry, Message: msg}
 
 	case ringq.RetryWithDelay:
 		attempt := msg.Attempts + 1
@@ -80,11 +60,7 @@ func (c *Coordinator) Handle(ctx context.Context, msg ringq.Message, result ring
 			if c.config.OnDLQ != nil {
 				c.config.OnDLQ(ctx, msg, err)
 			}
-			return Outcome{
-				Action:  ringq.DLQ,
-				Message: msg,
-				Err:     err,
-			}
+			return ringq.RetryOutcome{Action: ringq.DLQ, Message: msg, Err: err}
 		}
 		msg.Attempts = attempt
 		if c.config.OnRetry != nil {
@@ -94,27 +70,15 @@ func (c *Coordinator) Handle(ctx context.Context, msg ringq.Message, result ring
 		if delay <= 0 {
 			delay = c.config.BaseDelay
 		}
-		return Outcome{
-			Action:  ringq.RetryWithDelay,
-			Message: msg,
-			Delay:   delay,
-		}
+		return ringq.RetryOutcome{Action: ringq.RetryWithDelay, Message: msg, Delay: delay}
 
 	case ringq.DLQ:
 		if c.config.OnDLQ != nil {
 			c.config.OnDLQ(ctx, msg, result.Err)
 		}
-		return Outcome{
-			Action:  ringq.DLQ,
-			Message: msg,
-			Err:     result.Err,
-		}
+		return ringq.RetryOutcome{Action: ringq.DLQ, Message: msg, Err: result.Err}
 
 	default:
-		return Outcome{
-			Action:  ringq.DLQ,
-			Message: msg,
-			Err:     fmt.Errorf("retry: unknown action %v", result.Action),
-		}
+		return ringq.RetryOutcome{Action: ringq.DLQ, Message: msg, Err: fmt.Errorf("retry: unknown action %v", result.Action)}
 	}
 }

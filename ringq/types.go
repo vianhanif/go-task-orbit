@@ -36,3 +36,14 @@ type IdemStore interface {
 	Mark(ctx context.Context, key string, ttl time.Duration) error
 	Close() error
 }
+
+type RetryOutcome struct {
+	Action  Action
+	Message Message
+	Delay   time.Duration
+	Err     error
+}
+
+type RetryCoordinator interface {
+	Handle(ctx context.Context, msg Message, result Result) RetryOutcome
+}

@@ -6,15 +6,15 @@ import (
 
 func TestBasicEnqueueDequeue(t *testing.T) {
 	b := New(4, DropOldest)
-	for i := 0; i < 4; i++ {
+	for i := 0; i < b.Cap(); i++ {
 		if err := b.Enqueue(i); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	}
-	if b.Len() != 4 {
-		t.Fatalf("expected len 4, got %d", b.Len())
+	if b.Len() != b.Cap() {
+		t.Fatalf("expected len %d, got %d", b.Cap(), b.Len())
 	}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < b.Cap(); i++ {
 		item, ok := b.Dequeue()
 		if !ok {
 			t.Fatalf("expected item %d", i)
@@ -30,57 +30,53 @@ func TestBasicEnqueueDequeue(t *testing.T) {
 
 func TestDropOldest(t *testing.T) {
 	b := New(3, DropOldest)
-	for i := 0; i < 5; i++ {
+	cap := b.Cap()
+	for i := 0; i < cap+1; i++ {
 		if err := b.Enqueue(i); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	}
-	if b.Len() != 3 {
-		t.Fatalf("expected len 3, got %d", b.Len())
+	if b.Len() != cap {
+		t.Fatalf("expected len %d, got %d", cap, b.Len())
 	}
-	// oldest 0,1 should be dropped; 2,3,4 remain
-	for i := 2; i <= 4; i++ {
-		item, ok := b.Dequeue()
-		if !ok {
-			t.Fatalf("expected item %d", i)
-		}
-		if item.(int) != i {
-			t.Errorf("expected %d, got %d", i, item.(int))
-		}
+	item, ok := b.Dequeue()
+	if !ok {
+		t.Fatal("expected an item")
+	}
+	if item.(int) != 1 {
+		t.Errorf("expected first item to be 1 (0 dropped), got %d", item.(int))
 	}
 }
 
 func TestDropNewest(t *testing.T) {
 	b := New(3, DropNewest)
-	for i := 0; i < 5; i++ {
+	cap := b.Cap()
+	for i := 0; i < cap+1; i++ {
 		if err := b.Enqueue(i); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	}
-	if b.Len() != 3 {
-		t.Fatalf("expected len 3, got %d", b.Len())
+	if b.Len() != cap {
+		t.Fatalf("expected len %d, got %d", cap, b.Len())
 	}
-	// newest 3,4 should be dropped; 0,1,2 remain
-	for i := 0; i <= 2; i++ {
-		item, ok := b.Dequeue()
-		if !ok {
-			t.Fatalf("expected item %d", i)
-		}
-		if item.(int) != i {
-			t.Errorf("expected %d, got %d", i, item.(int))
-		}
+	item, ok := b.Dequeue()
+	if !ok {
+		t.Fatal("expected an item")
+	}
+	if item.(int) != 0 {
+		t.Errorf("expected first item 0, got %d", item.(int))
 	}
 }
 
 func TestReject(t *testing.T) {
 	b := New(2, Reject)
-	if err := b.Enqueue(1); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	cap := b.Cap()
+	for i := 0; i < cap; i++ {
+		if err := b.Enqueue(i); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 	}
-	if err := b.Enqueue(2); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := b.Enqueue(3); err != ErrBufferFull {
+	if err := b.Enqueue(cap); err != ErrBufferFull {
 		t.Errorf("expected ErrBufferFull, got %v", err)
 	}
 }

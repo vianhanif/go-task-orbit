@@ -10,6 +10,6 @@ type Hooks struct {
 	OnDispatch  func(ctx context.Context, topic string)
 	OnComplete  func(ctx context.Context, topic string, dur time.Duration)
 	OnError     func(ctx context.Context, topic string, err error)
-	OnRetry     func(ctx context.Context, topic string, attempt int)
+	OnRetry     func(ctx context.Context, topic string, msg Message, attempt int)
 	OnDuplicate func(ctx context.Context, key string)
 }

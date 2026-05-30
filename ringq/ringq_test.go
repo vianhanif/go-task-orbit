@@ -69,7 +69,7 @@ func TestPipelineRetryThenAck(t *testing.T) {
 	var attempt int32
 
 	tp := memory.New()
-	p := ringq.New().
+		p := ringq.New().
 		Transport(tp).
 		HandleWithRetry("test", func(_ context.Context, raw []byte) ringq.Result {
 			n := atomic.AddInt32(&attempt, 1)
@@ -77,7 +77,7 @@ func TestPipelineRetryThenAck(t *testing.T) {
 				return ringq.Result{Action: ringq.Retry}
 			}
 			return ringq.Result{Action: ringq.Ack}
-		}, 3, time.Millisecond).
+		}, 3, time.Millisecond, nil).
 		BufferSize(16).
 		Concurrency(2)
 

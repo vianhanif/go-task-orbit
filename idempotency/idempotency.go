@@ -38,16 +38,16 @@ func NewFilter(cfg Config) *Filter {
 	}
 }
 
-func (f *Filter) Filter(ctx context.Context, messages []ringq.Message) []ringq.Message {
+func (f *Filter) Filter(ctx context.Context, messages []ringq.Message) (kept []ringq.Message, duplicates []ringq.Message) {
 	if f.store == nil {
-		return messages
+		return messages, nil
 	}
 
-	result := make([]ringq.Message, 0, len(messages))
+	kept = make([]ringq.Message, 0, len(messages))
 	for _, msg := range messages {
 		key, ok := msg.Attributes[f.attributeKey]
 		if !ok {
-			result = append(result, msg)
+			kept = append(kept, msg)
 			continue
 		}
 
@@ -56,12 +56,13 @@ func (f *Filter) Filter(ctx context.Context, messages []ringq.Message) []ringq.M
 			if f.onDuplicate != nil {
 				f.onDuplicate(ctx, key)
 			}
+			duplicates = append(duplicates, msg)
 			continue
 		}
 
-		result = append(result, msg)
+		kept = append(kept, msg)
 	}
-	return result
+	return kept, duplicates
 }
 
 func (f *Filter) Mark(ctx context.Context, msg ringq.Message) error {

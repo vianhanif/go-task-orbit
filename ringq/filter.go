@@ -29,15 +29,15 @@ func newIdemFilter(cfg IdempotencyConfig, onDuplicate func(ctx context.Context, 
 	}
 }
 
-func (f *idemFilter) filter(ctx context.Context, messages []Message) []Message {
+func (f *idemFilter) filterDuplicates(ctx context.Context, messages []Message) (kept []Message, duplicates []Message) {
 	if f.store == nil {
-		return messages
+		return messages, nil
 	}
-	result := make([]Message, 0, len(messages))
+	kept = make([]Message, 0, len(messages))
 	for _, msg := range messages {
 		key, ok := msg.Attributes[f.attributeKey]
 		if !ok {
-			result = append(result, msg)
+			kept = append(kept, msg)
 			continue
 		}
 		exists, err := f.store.Exists(ctx, key)
@@ -45,11 +45,12 @@ func (f *idemFilter) filter(ctx context.Context, messages []Message) []Message {
 			if f.onDuplicate != nil {
 				f.onDuplicate(ctx, key)
 			}
+			duplicates = append(duplicates, msg)
 			continue
 		}
-		result = append(result, msg)
+		kept = append(kept, msg)
 	}
-	return result
+	return kept, duplicates
 }
 
 func (f *idemFilter) mark(ctx context.Context, msg Message) error {

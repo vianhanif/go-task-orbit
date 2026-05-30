@@ -46,8 +46,8 @@ pipeline := ringq.New().
         QueueURL: "https://sqs.us-east-1.amazonaws.com/123456789/orders-main",
         DLQURL:   "https://sqs.us-east-1.amazonaws.com/123456789/orders-dlq",
     })).
-    Handle("email.send", ringq.Handler[EmailPayload](SendEmailHandler)).
-    Handle("invoice.generate", ringq.Handler[InvoicePayload](GenerateInvoiceHandler)).
+    Handle("email.send", ringq.Wrap(SendEmailHandler)).
+    Handle("invoice.generate", ringq.Wrap(GenerateInvoiceHandler)).
     Idempotency(ringq.IdempotencyConfig{
         Store:        idempotency.NewMemoryStore(),
         AttributeKey: "IdempotencyKey",
@@ -119,7 +119,7 @@ pipeline.WithHooks(ringq.Hooks{
     OnError: func(ctx context.Context, topic string, err error) {
         // record error, set span status
     },
-    OnRetry: func(ctx context.Context, topic string, attempt int) {
+    OnRetry: func(ctx context.Context, topic string, msg ringq.Message, attempt int) {
         // track retry count
     },
     OnDuplicate: func(ctx context.Context, key string) {

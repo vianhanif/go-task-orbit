@@ -66,7 +66,7 @@ func TestFilterPassThrough(t *testing.T) {
 		{ID: "3", Attributes: nil},
 	}
 
-	filtered := f.Filter(ctx, msgs)
+	filtered, _ := f.Filter(ctx, msgs)
 	if len(filtered) != 3 {
 		t.Fatalf("expected 3 messages on first pass, got %d", len(filtered))
 	}
@@ -75,7 +75,7 @@ func TestFilterPassThrough(t *testing.T) {
 		f.Mark(ctx, m)
 	}
 
-	filtered = f.Filter(ctx, msgs)
+	filtered, _ = f.Filter(ctx, msgs)
 	if len(filtered) != 1 {
 		t.Fatalf("expected 1 message (no-key) on second pass, got %d", len(filtered))
 	}
@@ -96,16 +96,19 @@ func TestFilterDeduplicates(t *testing.T) {
 		{ID: "1", Attributes: map[string]string{"IdempotencyKey": "same"}},
 	}
 
-	first := f.Filter(ctx, msgs)
+	first, _ := f.Filter(ctx, msgs)
 	if len(first) != 1 {
 		t.Fatal("expected first pass to allow message through")
 	}
 
 	f.Mark(ctx, first[0])
 
-	second := f.Filter(ctx, msgs)
+	second, duplicates := f.Filter(ctx, msgs)
 	if len(second) != 0 {
 		t.Fatal("expected second pass to filter duplicate")
+	}
+	if len(duplicates) != 1 {
+		t.Fatal("expected duplicate returned")
 	}
 }
 
@@ -113,7 +116,7 @@ func TestFilterNoStore(t *testing.T) {
 	f := NewFilter(Config{})
 	msgs := []ringq.Message{{ID: "1", Attributes: map[string]string{"k": "v"}}}
 
-	filtered := f.Filter(context.Background(), msgs)
+	filtered, _ := f.Filter(context.Background(), msgs)
 	if len(filtered) != 1 {
 		t.Errorf("expected all messages through with no store, got %d", len(filtered))
 	}
