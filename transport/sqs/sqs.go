@@ -19,6 +19,7 @@ type Config struct {
 	MaxMessages       int32
 	WaitTime          int32
 	VisibilityTimeout int32
+	TopicAttribute    string
 }
 
 func (c *Config) defaults() {
@@ -107,7 +108,7 @@ func (t *SQSTransport) Subscribe(ctx context.Context, handler ringq.ConsumeHandl
 
 		messages := make([]ringq.Message, len(output.Messages))
 		for i, m := range output.Messages {
-			messages[i] = fromSQSMessage(m)
+			messages[i] = t.fromSQSMessage(m)
 		}
 
 		if err := handler(ctx, messages); err != nil {
@@ -198,11 +199,17 @@ func fromSQSAttributes(attrs map[string]types.MessageAttributeValue) map[string]
 	return result
 }
 
-func fromSQSMessage(m types.Message) ringq.Message {
+func (t *SQSTransport) fromSQSMessage(m types.Message) ringq.Message {
+	attrs := fromSQSAttributes(m.MessageAttributes)
+	topic := ""
+	if t.config.TopicAttribute != "" {
+		topic = attrs[t.config.TopicAttribute]
+	}
 	return ringq.Message{
 		ID:            *m.MessageId,
+		Topic:         topic,
 		Payload:       []byte(*m.Body),
 		ReceiptHandle: *m.ReceiptHandle,
-		Attributes:    fromSQSAttributes(m.MessageAttributes),
+		Attributes:    attrs,
 	}
 }

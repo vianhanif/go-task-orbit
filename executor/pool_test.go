@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"context"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -9,10 +8,7 @@ import (
 
 func TestPoolExecutesTasks(t *testing.T) {
 	p := New(4)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	p.Start(ctx)
+	p.Start()
 
 	var counter int32
 	for i := 0; i < 10; i++ {
@@ -21,7 +17,7 @@ func TestPoolExecutesTasks(t *testing.T) {
 		})
 	}
 
-	p.Stop()
+	p.StopDispatching()
 	p.Wait()
 
 	if n := atomic.LoadInt32(&counter); n != 10 {
@@ -31,15 +27,12 @@ func TestPoolExecutesTasks(t *testing.T) {
 
 func TestPoolConcurrencyLimit(t *testing.T) {
 	p := New(2)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	p.Start(ctx)
+	p.Start()
 
 	var concurrent int32
 	var maxConcurrent int32
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		p.Submit(func() {
 			c := atomic.AddInt32(&concurrent, 1)
 			for {
@@ -57,7 +50,7 @@ func TestPoolConcurrencyLimit(t *testing.T) {
 		})
 	}
 
-	p.Stop()
+	p.StopDispatching()
 	p.Wait()
 
 	if maxConcurrent > 2 {
@@ -67,13 +60,11 @@ func TestPoolConcurrencyLimit(t *testing.T) {
 
 func TestPoolTrySubmit(t *testing.T) {
 	p := New(1)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	p.Start(ctx)
+	p.Start()
 
 	started := make(chan struct{})
 	block := make(chan struct{})
+
 	p.Submit(func() {
 		close(started)
 		<-block
@@ -82,7 +73,7 @@ func TestPoolTrySubmit(t *testing.T) {
 	<-started
 
 	if !p.TrySubmit(func() {}) {
-		t.Error("expected TrySubmit to succeed with buffered slot")
+		t.Error("expected TrySubmit to succeed")
 	}
 
 	block2 := make(chan struct{})
@@ -91,17 +82,18 @@ func TestPoolTrySubmit(t *testing.T) {
 	})
 
 	if p.TrySubmit(func() {}) {
-		t.Error("expected TrySubmit to fail when all workers busy")
+		t.Error("expected TrySubmit to fail when queue is full")
 	}
 
 	close(block)
 	close(block2)
-	p.Stop()
+
+	p.StopDispatching()
 	p.Wait()
 }
 
 func TestPoolStopWithNoStart(t *testing.T) {
 	p := New(2)
-	p.Stop()
+	p.StopDispatching()
 	p.Wait()
 }

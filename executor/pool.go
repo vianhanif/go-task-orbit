@@ -1,14 +1,12 @@
 package executor
 
 import (
-	"context"
 	"sync"
 )
 
 type Pool struct {
 	workCh  chan func()
 	wg      sync.WaitGroup
-	cancel  context.CancelFunc
 	started bool
 	mu      sync.Mutex
 }
@@ -22,7 +20,7 @@ func New(size int) *Pool {
 	}
 }
 
-func (p *Pool) Start(ctx context.Context) {
+func (p *Pool) Start() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -31,28 +29,16 @@ func (p *Pool) Start(ctx context.Context) {
 	}
 	p.started = true
 
-	ctx, cancel := context.WithCancel(ctx)
-	p.cancel = cancel
-
-	capacity := cap(p.workCh)
-	p.wg.Add(capacity)
-	for i := 0; i < capacity; i++ {
-		go p.worker(ctx)
+	for i := 0; i < cap(p.workCh); i++ {
+		p.wg.Add(1)
+		go p.worker()
 	}
 }
 
-func (p *Pool) worker(ctx context.Context) {
+func (p *Pool) worker() {
 	defer p.wg.Done()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case fn, ok := <-p.workCh:
-			if !ok {
-				return
-			}
-			fn()
-		}
+	for fn := range p.workCh {
+		fn()
 	}
 }
 
@@ -69,12 +55,19 @@ func (p *Pool) TrySubmit(fn func()) bool {
 	}
 }
 
-func (p *Pool) Stop() {
+// StopDispatching stops the pool from accepting new tasks
+// by closing the work channel. All tasks already submitted
+// will be processed before workers exit. Do not call Submit
+// or TrySubmit after StopDispatching.
+func (p *Pool) StopDispatching() {
 	p.mu.Lock()
-	if p.cancel != nil {
-		p.cancel()
-	}
+	started := p.started
 	p.mu.Unlock()
+
+	if !started {
+		return
+	}
+	close(p.workCh)
 }
 
 func (p *Pool) Wait() {
