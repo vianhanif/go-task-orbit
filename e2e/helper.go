@@ -48,6 +48,12 @@ func setupEnv(t *testing.T) *testEnv {
 		t.Skip("Floci not reachable — set FLOCI_ENDPOINT or start Docker container")
 	}
 
+	// Floci (and most SQS emulators) accept any credentials.
+	// In CI there is no real AWS role, so provide dummy keys.
+	os.Setenv("AWS_ACCESS_KEY_ID", envOrDefault("AWS_ACCESS_KEY_ID", "test"))
+	os.Setenv("AWS_SECRET_ACCESS_KEY", envOrDefault("AWS_SECRET_ACCESS_KEY", "test"))
+	os.Setenv("AWS_SESSION_TOKEN", envOrDefault("AWS_SESSION_TOKEN", "test"))
+
 	cfg, err := config.LoadDefaultConfig(context.Background(),
 		config.WithRegion(awsRegion),
 	)

@@ -27,6 +27,10 @@ jobs:
         image: floci/floci:latest
         ports:
           - 4566:4566
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_SESSION_TOKEN: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
