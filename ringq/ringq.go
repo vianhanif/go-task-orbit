@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
 	"github.com/vianhanif/go-task-orbit/executor"
+	"github.com/vianhanif/go-task-orbit/internal/timerwheel"
 	"github.com/vianhanif/go-task-orbit/ring"
 )
 
@@ -30,6 +32,7 @@ type runtime struct {
 	transport  Transport
 	hooks      Hooks
 	idemFilter *idemFilter
+	timerWheel *timerwheel.Wheel
 }
 
 type Pipeline struct {
@@ -59,7 +62,7 @@ func (p *Pipeline) Transport(t Transport) *Pipeline {
 }
 
 func (p *Pipeline) Handle(topic string, fn DispatchFunc) *Pipeline {
-	return p.HandleWithRetry(topic, fn, 3, 5*time.Second, nil)
+	return p.HandleWithRetry(topic, fn, 10, 1*time.Second, nil)
 }
 
 func (p *Pipeline) HandleWithRetry(topic string, fn DispatchFunc, maxRetries int, baseDelay time.Duration, coordinator RetryCoordinator) *Pipeline {
@@ -128,14 +131,25 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		idemFilter = newIdemFilter(*idemConf, hooks.OnDuplicate)
 	}
 
+	tw := timerwheel.New()
+
 	rt := &runtime{
-		ringBuf:   ringBuf,
-		pool:      pool,
-		handlers:  handlers,
-		transport: transport,
-		hooks:     hooks,
+		ringBuf:    ringBuf,
+		pool:       pool,
+		handlers:   handlers,
+		transport:  transport,
+		hooks:      hooks,
 		idemFilter: idemFilter,
+		timerWheel: tw,
 	}
+
+	timerCtx, timerCancel := context.WithCancel(ctx)
+	var timerWg sync.WaitGroup
+	timerWg.Add(1)
+	go func() {
+		defer timerWg.Done()
+		rt.runTimer(timerCtx, tw.Start(timerCtx))
+	}()
 
 	pollCtx, pollCancel := context.WithCancel(ctx)
 
@@ -164,6 +178,9 @@ func (p *Pipeline) Run(ctx context.Context) error {
 	dispCancel()
 	dispWg.Wait()
 
+	timerCancel()
+	timerWg.Wait()
+
 	transport.Close()
 	pollerWg.Wait()
 
@@ -171,6 +188,12 @@ func (p *Pipeline) Run(ctx context.Context) error {
 	pool.Wait()
 
 	ringBuf.Close()
+
+	for _, item := range tw.Drain() {
+		if msg, ok := item.(Message); ok {
+			ringBuf.Enqueue(msg)
+		}
+	}
 
 	if idemFilter != nil {
 		idemFilter.close()
@@ -188,10 +211,34 @@ func (r *runtime) runPoller(ctx context.Context) error {
 			if r.hooks.OnDispatch != nil {
 				r.hooks.OnDispatch(subCtx, m.Topic)
 			}
-			r.ringBuf.Enqueue(m)
+			if m.NotBefore > 0 {
+				r.timerWheel.Insert(m, m.NotBefore)
+			} else {
+				r.ringBuf.Enqueue(m)
+			}
 		}
 		return nil
 	})
+}
+
+func (r *runtime) runTimer(ctx context.Context, ch <-chan []interface{}) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case batch, ok := <-ch:
+			if !ok {
+				return
+			}
+			for _, item := range batch {
+				msg, ok := item.(Message)
+				if !ok {
+					continue
+				}
+				r.ringBuf.Enqueue(msg)
+			}
+		}
+	}
 }
 
 func (r *runtime) runDispatcher(ctx context.Context) {
@@ -309,6 +356,8 @@ type defaultRetryCoordinator struct {
 	baseDelay  time.Duration
 }
 
+const maxRetryDelay = 5 * time.Minute
+
 func (d defaultRetryCoordinator) Handle(_ context.Context, msg Message, result Result) RetryOutcome {
 	switch result.Action {
 	case Ack:
@@ -326,7 +375,10 @@ func (d defaultRetryCoordinator) Handle(_ context.Context, msg Message, result R
 		msg.Attempts = attempt
 		delay := result.Delay
 		if delay <= 0 {
-			delay = d.baseDelay
+			delay = d.baseDelay * time.Duration(int64(math.Pow(2, float64(attempt-1))))
+			if delay > maxRetryDelay {
+				delay = maxRetryDelay
+			}
 		}
 		return RetryOutcome{Action: result.Action, Message: msg, Delay: delay}
 
