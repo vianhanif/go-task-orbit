@@ -49,12 +49,17 @@ jobs:
   e2e-gcp:
     runs-on: ubuntu-latest
     services:
-      floci-gcp:
-        image: floci/floci-gcp:latest
+      pubsub-emulator:
+        image: google/cloud-sdk:emulators
         ports:
-          - 4588:4588
+          - 8085:8085
+        options: >-
+          --entrypoint gcloud
+          beta emulators pubsub start
+          --project=test-project
+          --host-port=0.0.0.0:8085
     env:
-      PUBSUB_EMULATOR_HOST: localhost:4588
+      PUBSUB_EMULATOR_HOST: localhost:8085
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v5

@@ -3,8 +3,8 @@ version: '3'
 vars:
   FLOCI_IMAGE: floci/floci:latest
   FLOCI_PORT: '4566'
-  FLOCI_GCP_IMAGE: floci/floci-gcp:latest
-  FLOCI_GCP_PORT: '4588'
+  FLOCI_GCP_IMAGE: google/cloud-sdk:emulators
+  FLOCI_GCP_PORT: '8085'
 
 tasks:
   test:
@@ -70,11 +70,11 @@ tasks:
     ignore_error: true
 
   floci-gcp-start:
-    desc: Start Floci GCP emulator
+    desc: Start GCP Pub/Sub emulator
     cmds:
-      - docker run -d --name floci-gcp-e2e -p {{.FLOCI_GCP_PORT}}:{{.FLOCI_GCP_PORT}} {{.FLOCI_GCP_IMAGE}}
+      - docker run -d --name floci-gcp-e2e -p {{.FLOCI_GCP_PORT}}:{{.FLOCI_GCP_PORT}} {{.FLOCI_GCP_IMAGE}} beta emulators pubsub start --project=test-project --host-port=0.0.0.0:{{.FLOCI_GCP_PORT}}
       - |
-        until curl -s http://localhost:{{.FLOCI_GCP_PORT}}/_floci/health; do
+        until curl -s http://localhost:{{.FLOCI_GCP_PORT}}/; do
           sleep 0.5
         done
 

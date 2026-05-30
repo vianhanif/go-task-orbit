@@ -26,7 +26,7 @@ func setupPubSubEnv(t *testing.T) *gcpTestEnv {
 	t.Helper()
 
 	if os.Getenv("PUBSUB_EMULATOR_HOST") == "" {
-		os.Setenv("PUBSUB_EMULATOR_HOST", "localhost:4588")
+		os.Setenv("PUBSUB_EMULATOR_HOST", "localhost:8085")
 	}
 
 	projectID := "test-project"
