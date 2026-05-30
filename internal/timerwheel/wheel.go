@@ -8,16 +8,20 @@ import (
 
 const tickInterval = time.Second
 
+type slot struct {
+	target time.Time
+	item   interface{}
+}
+
 type Wheel struct {
 	mu      sync.Mutex
-	buckets map[int64][]interface{}
-	current int64
+	buckets map[int64][]slot
 	closed  bool
 }
 
 func New() *Wheel {
 	return &Wheel{
-		buckets: make(map[int64][]interface{}),
+		buckets: make(map[int64][]slot),
 	}
 }
 
@@ -29,8 +33,9 @@ func (w *Wheel) Insert(item interface{}, delay time.Duration) {
 		return
 	}
 
-	tick := time.Now().Add(delay).Unix()
-	w.buckets[tick] = append(w.buckets[tick], item)
+	target := time.Now().Add(delay)
+	tick := target.Unix()
+	w.buckets[tick] = append(w.buckets[tick], slot{target: target, item: item})
 }
 
 func (w *Wheel) Start(ctx context.Context) <-chan []interface{} {
@@ -66,10 +71,24 @@ func (w *Wheel) expire(tick int64) []interface{} {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
+	now := time.Now()
 	result := make([]interface{}, 0)
-	for t, items := range w.buckets {
-		if t <= tick && len(items) > 0 {
-			result = append(result, items...)
+
+	for t, slots := range w.buckets {
+		if t > tick {
+			continue
+		}
+		var keep []slot
+		for _, s := range slots {
+			if s.target.After(now) {
+				keep = append(keep, s)
+			} else {
+				result = append(result, s.item)
+			}
+		}
+		if len(keep) > 0 {
+			w.buckets[t] = keep
+		} else {
 			delete(w.buckets, t)
 		}
 	}
@@ -81,8 +100,8 @@ func (w *Wheel) Len() int {
 	defer w.mu.Unlock()
 
 	count := 0
-	for _, items := range w.buckets {
-		count += len(items)
+	for _, slots := range w.buckets {
+		count += len(slots)
 	}
 	return count
 }
@@ -94,8 +113,10 @@ func (w *Wheel) Drain() []interface{} {
 	w.closed = true
 
 	result := make([]interface{}, 0)
-	for _, items := range w.buckets {
-		result = append(result, items...)
+	for _, slots := range w.buckets {
+		for _, s := range slots {
+			result = append(result, s.item)
+		}
 	}
 	w.buckets = nil
 	return result
