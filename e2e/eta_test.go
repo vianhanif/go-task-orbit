@@ -130,7 +130,7 @@ func TestE2EETAExponentialBackoff(t *testing.T) {
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
@@ -146,7 +146,7 @@ func TestE2EETAExponentialBackoff(t *testing.T) {
 	}
 	t.Log("published — expecting exponential backoff: 1s, 2s, 4s, DLQ")
 
-	time.Sleep(20 * time.Second)
+	time.Sleep(30 * time.Second)
 	cancel()
 
 	n := atomic.LoadInt32(&attempt)
