@@ -75,7 +75,7 @@ go-task-orbit currently supports only AWS SQS and in-memory transports. Teams de
 | Message | `ringq.Message` (data = payload, attributes = metadata + topic + idempotency key) |
 | Ack | `ringq.Transport.Ack()` → `msg.Ack()` |
 | Nack | `ringq.Transport.Nack()` → `msg.Nack()` (or modify ack deadline for delay) |
-| Dead Letter Topic | `ringq.Transport.SendToDLQ()` → publish to DLQ topic |
+| Dead Letter Topic | `ringq.Transport.SendToDLQ()` → `msg.Nack()` — relies on subscription DLQ policy |
 | Message attributes | `ringq.Message.Attributes` ↔ Pub/Sub attributes map |
 | Ordering key | Optional — not used in v1 |
 
@@ -103,7 +103,7 @@ Phase 2 could add multi-topic support (one Pub/Sub topic per go-task-orbit topic
 
 | # | Scope | Details | Complexity | Recommended LLM | Estimate |
 |---|---|---|---|---|---|
-| 1 | Pub/Sub Config struct | ProjectID, TopicID, SubscriptionID, DLQTopicID, MaxMessages, credential options | Low | Fast | 0.5h |
+| 1 | Pub/Sub Config struct | ProjectID, TopicID, SubscriptionID, MaxMessages, TopicAttribute | Low | Fast | 0.5h |
 | 2 | Client initialization | `pubsub.NewClient()`, emulator detection (`PUBSUB_EMULATOR_HOST`), credential loading | Low | Fast | 0.5h |
 | 3 | Publish implementation | `topic.Publish()` with attributes, block until server confirms | Low | Fast | 1h |
 | 4 | Subscribe implementation | Pull subscription with `subscription.Receive()`, batch handler, context cancellation | Medium | Mid | 2h |
@@ -343,7 +343,7 @@ jobs:
 4. `ringq.Message.Attributes` map 1:1 to Pub/Sub message attributes
 5. GKE pods use Workload Identity for Pub/Sub access (no service account keys)
 6. Pub/Sub message ordering is not required for v1 (standard subscription)
-7. `cloud.google.com/go/pubsub` Go module is compatible with Go 1.19 OR a separate go.mod is acceptable
+7. `cloud.google.com/go/pubsub` Go module is compatible with Go 1.21+ (project go.mod bumped accordingly)
 
 ---
 

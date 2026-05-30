@@ -8,7 +8,7 @@
 | Type | Story |
 | Title | E2E tests using Floci (AWS emulator) + GitHub Actions CI |
 | Repo | `github.com/vianhanif/go-task-orbit` |
-| Go Version | 1.19 |
+| Go Version | 1.21+ |
 | Branch source | `main` |
 
 ---
@@ -49,7 +49,7 @@ Local Development                              CI (GitHub Actions)
          └── Taskfile.yml (single source of truth for all commands)
 ```
 
-#### Taskfile.yml (replaces raw Docker/shell commands)
+---
 
 #### Test Flow (each e2e test)
 
@@ -253,7 +253,7 @@ func setupQueues(t *testing.T) (mainURL, dlqURL string, client *sqs.Client) {
 | Floci Docker image pull rate limit | GitHub Actions runner caches Docker layers; use `docker pull` with retry |
 | Floci SQS vs real SQS behavior differences | Test both happy path and edge cases; document any known discrepancies |
 | Test speed (Docker startup ~24ms, queue creation ~100ms) | Pool queues across tests via TestMain; acceptable for e2e suite |
-| Go 1.19 compatibility with Floci SDK interaction | AWS SDK v2 works fine; endpoint override is standard SDK feature |
+| Go 1.21+ compatibility with Floci SDK interaction | AWS SDK v2 works fine; endpoint override is standard SDK feature |
 | Local dev without Docker | `t.Skip()` if Floci is unreachable; unit tests still pass via in-memory transport |
 
 ---
@@ -270,7 +270,8 @@ func setupQueues(t *testing.T) (mainURL, dlqURL string, client *sqs.Client) {
 
 ### Out of Scope
 
-- Azure or GCP e2e tests (separate task)
+- Azure e2e tests (separate task)
+- GCP e2e tests (covered in `20260531-IO-359-gcp-pubsub-transport.md`)
 - Performance/load testing
 - Chaos testing (network partitions, Floci crashes)
 - Integration with real AWS SQS (requires cloud credentials)
