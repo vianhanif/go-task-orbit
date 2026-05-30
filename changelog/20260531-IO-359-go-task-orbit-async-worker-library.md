@@ -8,7 +8,7 @@
 | Type | Story |
 | Title | go-task-orbit: AWS-native async worker library with ring-buffer scheduling |
 | Repo | `github.com/vianhanif/go-task-orbit` (new standalone) |
-| Go Version | 1.19 |
+| Go Version | 1.21+ (bumped from 1.19 for GCP Pub/Sub transport compatibility) |
 | Branch source | `master` (new repo) |
 
 ---
@@ -263,8 +263,9 @@ type IdemStore interface {
 | Explicit Result type over error-only | Handlers need fine-grained control: retry with delay, skip to DLQ, ack silently |
 | Raw `[]byte` transport, default JSON codec | No opinion on serialization; typed handlers get default JSON, raw handlers get bytes |
 | At-least-once with idempotency | Adequate for I/O-bound + DB-bound workloads; simpler than exactly-once |
-| Go 1.19 target | Matches core-api go.mod constraint |
+| Go 1.21 target | Required for GCP Pub/Sub transport (`cloud.google.com/go/pubsub`). Upgraded from original 1.19 constraint. |
 | Batch APIs everywhere internally | Massive SQS cost reduction, higher throughput |
+| Task (taskfile.dev) as build tool | Single YAML-based task runner for test/lint/e2e. Replaces raw shell scripts. Cross-platform, single binary. |
 
 ---
 

@@ -4,7 +4,7 @@ Async worker library for Go with ring-buffer scheduling and pluggable transport 
 
 **Module:** `github.com/vianhanif/go-task-orbit`
 
-**Go:** 1.19+
+**Go:** 1.21+
 
 <img src="architecture.svg" alt="go-task-orbit architecture" width="800">
 
