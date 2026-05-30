@@ -29,6 +29,7 @@ type Message struct {
 	Attributes    map[string]string
 	ReceiptHandle string
 	Attempts      int
+	NotBefore     time.Duration
 }
 
 type IdemStore interface {
