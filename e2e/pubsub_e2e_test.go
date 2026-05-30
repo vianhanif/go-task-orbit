@@ -1,4 +1,4 @@
-//go:build e2e
+//go:build e2e_gcp
 
 package e2e
 
@@ -10,29 +10,13 @@ import (
 	"time"
 
 	"github.com/vianhanif/go-task-orbit/ringq"
-	sqst "github.com/vianhanif/go-task-orbit/transport/sqs"
 )
 
-func newSQSTransport(queueURL string) *sqst.SQSTransport {
-	return newSQSTransportWithVis(queueURL, 30)
-}
-
-func newSQSTransportWithVis(queueURL string, vis int32) *sqst.SQSTransport {
-	return sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: vis,
-		BaseEndpoint:      flociEndpoint,
-	})
-}
-
-func TestE2EHappyPath(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-happy")
+func TestE2EGCPHappyPath(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var called int32
-	transport := newSQSTransport(queueURL)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
@@ -52,7 +36,7 @@ func TestE2EHappyPath(t *testing.T) {
 	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "test",
-		Payload: []byte("hello"),
+		Payload: []byte("hello-gcp"),
 	}); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
@@ -66,12 +50,11 @@ func TestE2EHappyPath(t *testing.T) {
 	env.cleanup(t)
 }
 
-func TestE2ERetryThenAck(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-retry")
+func TestE2EGCPRetry(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var attempt int32
-	transport := newSQSTransportWithVis(queueURL, 5)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
@@ -108,12 +91,11 @@ func TestE2ERetryThenAck(t *testing.T) {
 	env.cleanup(t)
 }
 
-func TestE2EDLQ(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-dlq")
+func TestE2EGCPDLQ(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var dlqCalled int32
-	transport := newSQSTransportWithVis(queueURL, 5)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
@@ -151,12 +133,11 @@ func TestE2EDLQ(t *testing.T) {
 	env.cleanup(t)
 }
 
-func TestE2EIdempotency(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-idem")
+func TestE2EGCPIdempotency(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var called int32
-	transport := newSQSTransportWithVis(queueURL, 10)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
@@ -205,12 +186,11 @@ func TestE2EIdempotency(t *testing.T) {
 	env.cleanup(t)
 }
 
-func TestE2EBatchReceive(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-batch")
+func TestE2EGCPBatch(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var count int32
-	transport := newSQSTransportWithVis(queueURL, 10)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
@@ -246,55 +226,11 @@ func TestE2EBatchReceive(t *testing.T) {
 	env.cleanup(t)
 }
 
-func TestE2EGracefulShutdown(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-shutdown")
-
-	var started int32
-	block := make(chan struct{})
-
-	transport := newSQSTransportWithVis(queueURL, 10)
-
-	p := ringq.New().
-		Transport(transport).
-		Handle("test", func(_ context.Context, raw []byte) ringq.Result {
-			atomic.StoreInt32(&started, 1)
-			<-block
-			return ringq.Result{Action: ringq.Ack}
-		}).
-		Concurrency(1).
-		BufferSize(16)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go p.Run(ctx)
-
-	time.Sleep(500 * time.Millisecond)
-	if err := transport.Publish(ctx, ringq.Message{
-		ID:      "1",
-		Topic:   "test",
-		Payload: []byte("slow"),
-	}); err != nil {
-		t.Fatalf("publish: %v", err)
-	}
-
-	time.Sleep(3 * time.Second)
-	cancel()
-
-	if n := atomic.LoadInt32(&started); n != 1 {
-		t.Errorf("expected handler to have started before shutdown")
-	}
-
-	close(block)
-	time.Sleep(500 * time.Millisecond)
-	env.cleanup(t)
-}
-
-func TestE2EUnknownTopic(t *testing.T) {
-	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-unknown")
+func TestE2EGCPUnknownTopic(t *testing.T) {
+	env := setupPubSubEnv(t)
 
 	var errCalled int32
-	transport := newSQSTransportWithVis(queueURL, 5)
+	transport := env.createTransport(t)
 
 	p := ringq.New().
 		Transport(transport).
