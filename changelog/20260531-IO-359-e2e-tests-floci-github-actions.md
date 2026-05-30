@@ -22,16 +22,16 @@ Add end-to-end integration tests that exercise the full pipeline — SQS transpo
 Current tests use the in-memory transport (`transport/memory`), which bypasses the SQS transport entirely. The SQS transport has unit tests (`transport/sqs/sqs_test.go`) but no integration tests that verify the full pipeline with actual SQS protocol interactions. Floci provides a fast (24ms startup), no-auth, MIT-licensed SQS emulator that can run in GitHub Actions without cloud credentials.
 
 #### Success criteria
-- [ ] Docker-based Floci AWS emulator running SQS locally and in CI
-- [ ] E2E test: publish → receive → process → ack (happy path)
-- [ ] E2E test: publish → receive → process → retry → ack
-- [ ] E2E test: publish → receive → process → DLQ
-- [ ] E2E test: idempotency with real SQS message attributes
-- [ ] E2E test: batch processing (multiple messages in one receive)
-- [ ] E2E test: visibility timeout extension via Nack/RetryWithDelay
-- [ ] E2E test: graceful shutdown drains inflight messages
-- [ ] GitHub Actions workflow that starts Floci, runs e2e tests
-- [ ] Tests are skipped if Floci is not available (for local dev without Docker)
+- [x] Docker-based Floci AWS emulator running SQS locally and in CI
+- [x] E2E test: publish → receive → process → ack (happy path)
+- [x] E2E test: publish → receive → process → retry → ack
+- [x] E2E test: publish → receive → process → DLQ
+- [x] E2E test: idempotency with real SQS message attributes
+- [x] E2E test: batch processing (multiple messages in one receive)
+- [x] E2E test: visibility timeout extension via Nack/RetryWithDelay
+- [x] E2E test: graceful shutdown drains inflight messages
+- [x] GitHub Actions workflow that starts Floci, runs e2e tests
+- [x] Tests are skipped if Floci is not available (for local dev without Docker)
 
 ---
 
