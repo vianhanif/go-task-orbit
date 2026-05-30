@@ -3,7 +3,9 @@
 Async worker library for Go with ring-buffer scheduling and pluggable transport backends (SQS, Pub/Sub, In-Memory).
 
 **Module:** `github.com/vianhanif/go-task-orbit`
+
 **Go:** 1.21+
+
 **CI:** [![E2E Tests](https://github.com/vianhanif/go-task-orbit/actions/workflows/e2e.yml/badge.svg)](https://github.com/vianhanif/go-task-orbit/actions/workflows/e2e.yml)
 
 <img src="architecture.svg" alt="go-task-orbit architecture" width="800">
