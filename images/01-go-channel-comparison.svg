@@ -1,26 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="500" height="250">
-  <rect width="500" height="250" rx="8" fill="#0d1117"/>
-  <rect x="20" y="60" width="120" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
-  <text x="80" y="85" text-anchor="middle" font-family="SF Mono, monospace" font-size="11" fill="#e6edf3">Producer 1</text>
-  <rect x="20" y="110" width="120" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
-  <text x="80" y="135" text-anchor="middle" font-family="SF Mono, monospace" font-size="11" fill="#e6edf3">Producer 2</text>
-  <rect x="20" y="160" width="120" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
-  <text x="80" y="185" text-anchor="middle" font-family="SF Mono, monospace" font-size="11" fill="#e6edf3">Producer 3</text>
-  <rect x="190" y="90" width="130" height="60" rx="6" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5"/>
-  <text x="255" y="118" text-anchor="middle" font-family="SF Mono, monospace" font-size="10" fill="#d2a8ff">Unbuffered</text>
-  <text x="255" y="135" text-anchor="middle" font-family="SF Mono, monospace" font-size="10" fill="#d2a8ff">Channel</text>
-  <rect x="370" y="90" width="110" height="40" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
-  <text x="425" y="115" text-anchor="middle" font-family="SF Mono, monospace" font-size="11" fill="#e6edf3">Worker 1</text>
-  <line x1="140" y1="80" x2="185" y2="105" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#aBlue)" opacity="0.6"/>
-  <line x1="140" y1="130" x2="185" y2="120" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#aBlue)" opacity="0.6"/>
-  <line x1="140" y1="180" x2="185" y2="135" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#aBlue)" opacity="0.6"/>
-  <line x1="320" y1="120" x2="365" y2="110" stroke="#3fb950" stroke-width="1.5" marker-end="url(#aGreen)"/>
-  <path d="M 240 150 L 240 200 L 80 200 L 80 205" stroke="#f0883e" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
-  <text x="240" y="195" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#f0883e" opacity="0.7">blocks when receiver slow</text>
-  <text x="250" y="35" text-anchor="middle" font-family="SF Mono, monospace" font-size="13" font-weight="bold" fill="#e6edf3">Go Channel</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" width="520" height="240">
   <defs>
-    <marker id="aBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/></marker>
-    <marker id="aGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3fb950"/></marker>
-    <marker id="aOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f0883e"/></marker>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <marker id="aBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#58a6ff"/>
+    </marker>
+    <marker id="aOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#f0883e"/>
+    </marker>
+    <marker id="aGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#3fb950"/>
+    </marker>
   </defs>
+  <rect width="520" height="240" rx="8" fill="url(#bg)"/>
+  <text x="260" y="30" text-anchor="middle" font-family="SF Mono,Menlo,monospace" font-size="13" font-weight="bold" fill="#e6edf3">Go Channel</text>
+  <!-- Producers -->
+  <rect x="30" y="70" width="110" height="36" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="85" y="92" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#e6edf3">Producer 1</text>
+  <rect x="30" y="120" width="110" height="36" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="85" y="142" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#e6edf3">Producer 2</text>
+  <rect x="30" y="170" width="110" height="36" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="85" y="192" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#e6edf3">Producer 3</text>
+  <!-- Channel -->
+  <polygon points="260,108 320,88 380,108 380,168 320,188 260,168" fill="#1c2333" stroke="#d2a8ff" stroke-width="1.5"/>
+  <text x="320" y="128" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" font-weight="bold" fill="#d2a8ff">Unbuffered</text>
+  <text x="320" y="145" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#d2a8ff">Channel</text>
+  <!-- Worker -->
+  <rect x="410" y="120" width="80" height="36" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="450" y="142" text-anchor="middle" font-family="SF Mono,monospace" font-size="10" fill="#e6edf3">Worker 1</text>
+  <!-- Arrows -->
+  <line x1="140" y1="88" x2="254" y2="118" stroke="#58a6ff" stroke-width="1.8" marker-end="url(#aBlue)"/>
+  <line x1="140" y1="138" x2="256" y2="133" stroke="#58a6ff" stroke-width="1.8" marker-end="url(#aBlue)"/>
+  <line x1="140" y1="188" x2="254" y2="158" stroke="#58a6ff" stroke-width="1.8" marker-end="url(#aBlue)"/>
+  <line x1="380" y1="138" x2="405" y2="138" stroke="#3fb950" stroke-width="1.8" marker-end="url(#aGreen)"/>
+  <path d="M 85 206 Q 85 225 200 225 Q 320 225 320 193" stroke="#f0883e" stroke-width="1.5" stroke-dasharray="5 3" fill="none" marker-end="url(#aOrange)" opacity="0.7"/>
+  <text x="200" y="220" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#f0883e" opacity="0.7">blocks when receiver slow</text>
 </svg>
