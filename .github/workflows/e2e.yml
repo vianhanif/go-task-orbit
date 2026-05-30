@@ -45,3 +45,23 @@ jobs:
         with:
           version: '3.x'
       - run: task e2e-ci
+
+  e2e-gcp:
+    runs-on: ubuntu-latest
+    services:
+      floci-gcp:
+        image: floci/floci-gcp:latest
+        ports:
+          - 4588:4588
+    env:
+      PUBSUB_EMULATOR_HOST: localhost:4588
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: false
+      - uses: arduino/setup-task@v2
+        with:
+          version: '3.x'
+      - run: task e2e-gcp-ci

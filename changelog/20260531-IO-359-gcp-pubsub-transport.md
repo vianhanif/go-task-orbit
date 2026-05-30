@@ -26,16 +26,16 @@ go-task-orbit currently supports only AWS SQS and in-memory transports. Teams de
 - Has the same programming model as the SQS transport
 
 #### Success criteria
-- [ ] `transport/pubsub` package implementing `ringq.Transport` interface
-- [ ] Publish: send messages to a Pub/Sub topic
-- [ ] Subscribe: pull from a Pub/Sub subscription, feed messages individually to ring buffer
-- [ ] Ack: acknowledge processed messages
-- [ ] Nack: nack messages with delay (modify ack deadline, same as SQS visibility timeout)
-- [ ] SendToDLQ: Nack the message — relies on subscription-level dead letter topic policy (no separate DLQ topic in config)
-- [ ] Pub/Sub message attributes → `ringq.Message.Attributes` (for topic routing + idempotency key)
-- [ ] Topic-based routing: Pub/Sub attributes carry the topic name via `"X-Topic"` attribute
-- [ ] Unit tests using floci-gcp emulator (optional — skip if not available)
-- [ ] Full pipeline e2e tests using floci-gcp + GitHub Actions (same scenarios as SQS e2e)
+- [x] `transport/pubsub` package implementing `ringq.Transport` interface
+- [x] Publish: send messages to a Pub/Sub topic
+- [x] Subscribe: pull from a Pub/Sub subscription, feed messages individually to ring buffer
+- [x] Ack: acknowledge processed messages
+- [x] Nack: nack messages with delay (modify ack deadline, same as SQS visibility timeout)
+- [x] SendToDLQ: Nack the message — relies on subscription-level dead letter topic policy (no separate DLQ topic in config)
+- [x] Pub/Sub message attributes → `ringq.Message.Attributes` (for topic routing + idempotency key)
+- [x] Topic-based routing: Pub/Sub attributes carry the topic name via `"X-Topic"` attribute
+- [x] Unit tests using floci-gcp emulator (optional — skip if not available)
+- [x] Full pipeline e2e tests using floci-gcp + GitHub Actions (same scenarios as SQS e2e)
 
 ---
 
