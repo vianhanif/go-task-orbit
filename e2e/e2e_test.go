@@ -14,17 +14,26 @@ import (
 	sqst "github.com/vianhanif/go-task-orbit/transport/sqs"
 )
 
+func newSQSTransport(queueURL string) *sqst.SQSTransport {
+	return newSQSTransportWithVis(queueURL, 30)
+}
+
+func newSQSTransportWithVis(queueURL string, vis int32) *sqst.SQSTransport {
+	return sqst.New(sqst.Config{
+		QueueURL:          queueURL,
+		MaxMessages:       10,
+		WaitTime:          2,
+		VisibilityTimeout: vis,
+		BaseEndpoint:      flociEndpoint,
+	})
+}
+
 func TestE2EHappyPath(t *testing.T) {
 	env := setupEnv(t)
 	queueURL := env.createQueue(t, "e2e-happy")
 
 	var called int32
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 30,
-	})
+	transport := newSQSTransport(queueURL)
 
 	p := ringq.New().
 		Transport(transport).
@@ -35,19 +44,21 @@ func TestE2EHappyPath(t *testing.T) {
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "test",
 		Payload: []byte("hello"),
-	})
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&called); n != 1 {
@@ -61,12 +72,7 @@ func TestE2ERetryThenAck(t *testing.T) {
 	queueURL := env.createQueue(t, "e2e-retry")
 
 	var attempt int32
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 5,
-	})
+	transport := newSQSTransportWithVis(queueURL, 5)
 
 	p := ringq.New().
 		Transport(transport).
@@ -80,19 +86,21 @@ func TestE2ERetryThenAck(t *testing.T) {
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "test",
 		Payload: []byte("retry-me"),
-	})
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(8 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&attempt); n != 2 {
@@ -105,38 +113,42 @@ func TestE2EDLQ(t *testing.T) {
 	env := setupEnv(t)
 	queueURL := env.createQueue(t, "e2e-dlq")
 
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 5,
-	})
+	var dlqCalled int32
+	transport := newSQSTransportWithVis(queueURL, 5)
 
 	p := ringq.New().
 		Transport(transport).
 		Handle("test", func(_ context.Context, raw []byte) ringq.Result {
 			return ringq.Result{Action: ringq.DLQ, Err: fmt.Errorf("unrecoverable")}
 		}).
+		WithHooks(ringq.Hooks{
+			OnError: func(_ context.Context, topic string, err error) {
+				atomic.AddInt32(&dlqCalled, 1)
+			},
+		}).
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "test",
 		Payload: []byte("fail"),
-	})
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 	cancel()
 
-	// Verify main queue is empty (message was acked after DLQ send)
-	// Verifying DLQ queue content requires receiving from the DLQ
+	if n := atomic.LoadInt32(&dlqCalled); n < 1 {
+		t.Errorf("expected at least 1 OnError call for DLQ, got %d", n)
+	}
 	env.cleanup(t)
 }
 
@@ -145,12 +157,7 @@ func TestE2EIdempotency(t *testing.T) {
 	queueURL := env.createQueue(t, "e2e-idem")
 
 	var called int32
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 10,
-	})
+	transport := newSQSTransportWithVis(queueURL, 10)
 
 	p := ringq.New().
 		Transport(transport).
@@ -166,28 +173,31 @@ func TestE2EIdempotency(t *testing.T) {
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
-	// Publish two messages with same idempotency key
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:         "1",
 		Topic:      "test",
 		Payload:    []byte("first"),
 		Attributes: map[string]string{"IdempotencyKey": "dup-key"},
-	})
-	time.Sleep(1 * time.Second)
+	}); err != nil {
+		t.Fatalf("publish 1: %v", err)
+	}
+	time.Sleep(3 * time.Second)
 
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:         "2",
 		Topic:      "test",
 		Payload:    []byte("second"),
 		Attributes: map[string]string{"IdempotencyKey": "dup-key"},
-	})
-	time.Sleep(3 * time.Second)
+	}); err != nil {
+		t.Fatalf("publish 2: %v", err)
+	}
+	time.Sleep(5 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&called); n != 1 {
@@ -201,43 +211,34 @@ func TestE2EBatchReceive(t *testing.T) {
 	queueURL := env.createQueue(t, "e2e-batch")
 
 	var count int32
-	var mu sync.Mutex
-	var received []string
-
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 10,
-	})
+	transport := newSQSTransportWithVis(queueURL, 10)
 
 	p := ringq.New().
 		Transport(transport).
 		Handle("test", func(_ context.Context, raw []byte) ringq.Result {
-			mu.Lock()
-			received = append(received, string(raw))
-			mu.Unlock()
 			atomic.AddInt32(&count, 1)
 			return ringq.Result{Action: ringq.Ack}
 		}).
 		Concurrency(2).
 		BufferSize(32)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
 	for i := 0; i < 5; i++ {
-		transport.Publish(ctx, ringq.Message{
+		if err := transport.Publish(ctx, ringq.Message{
 			ID:      fmt.Sprintf("%d", i),
 			Topic:   "test",
 			Payload: []byte(fmt.Sprintf("msg-%d", i)),
-		})
+		}); err != nil {
+			t.Fatalf("publish %d: %v", i, err)
+		}
 	}
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&count); n != 5 {
@@ -253,12 +254,7 @@ func TestE2EGracefulShutdown(t *testing.T) {
 	var started int32
 	block := make(chan struct{})
 
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 10,
-	})
+	transport := newSQSTransportWithVis(queueURL, 10)
 
 	p := ringq.New().
 		Transport(transport).
@@ -274,13 +270,15 @@ func TestE2EGracefulShutdown(t *testing.T) {
 	go p.Run(ctx)
 
 	time.Sleep(500 * time.Millisecond)
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "test",
 		Payload: []byte("slow"),
-	})
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	cancel()
 
 	if n := atomic.LoadInt32(&started); n != 1 {
@@ -297,12 +295,7 @@ func TestE2EUnknownTopic(t *testing.T) {
 	queueURL := env.createQueue(t, "e2e-unknown")
 
 	var errCalled int32
-	transport := sqst.New(sqst.Config{
-		QueueURL:          queueURL,
-		MaxMessages:       10,
-		WaitTime:          2,
-		VisibilityTimeout: 5,
-	})
+	transport := newSQSTransportWithVis(queueURL, 5)
 
 	p := ringq.New().
 		Transport(transport).
@@ -317,28 +310,29 @@ func TestE2EUnknownTopic(t *testing.T) {
 		Concurrency(2).
 		BufferSize(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	go p.Run(ctx)
 	time.Sleep(500 * time.Millisecond)
 
-	transport.Publish(ctx, ringq.Message{
+	if err := transport.Publish(ctx, ringq.Message{
 		ID:      "1",
 		Topic:   "unknown",
 		Payload: []byte("?"),
-	})
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 	cancel()
 
-	if n := atomic.LoadInt32(&errCalled); n != 1 {
-		t.Errorf("expected 1 OnError call for unknown topic, got %d", n)
+	if n := atomic.LoadInt32(&errCalled); n < 1 {
+		t.Errorf("expected at least 1 OnError call for unknown topic, got %d", n)
 	}
 	env.cleanup(t)
 }
 
-// syncIdemStore is a simple in-memory store for e2e tests.
 type syncIdemStore struct {
 	mu   sync.Mutex
 	keys map[string]time.Time

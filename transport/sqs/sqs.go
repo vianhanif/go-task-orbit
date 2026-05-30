@@ -20,6 +20,7 @@ type Config struct {
 	WaitTime          int32
 	VisibilityTimeout int32
 	TopicAttribute    string
+	BaseEndpoint      string
 }
 
 func (c *Config) defaults() {
@@ -61,7 +62,13 @@ func (t *SQSTransport) ensureClient(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("sqs: failed to load AWS config: %w", err)
 	}
-	t.client = sqs.NewFromConfig(awsCfg)
+	opts := make([]func(*sqs.Options), 0)
+	if t.config.BaseEndpoint != "" {
+		opts = append(opts, func(o *sqs.Options) {
+			o.BaseEndpoint = aws.String(t.config.BaseEndpoint)
+		})
+	}
+	t.client = sqs.NewFromConfig(awsCfg, opts...)
 	return nil
 }
 
