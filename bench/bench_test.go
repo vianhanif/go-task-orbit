@@ -2,6 +2,7 @@ package bench
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -64,4 +65,66 @@ func BenchmarkPipelineThroughput(b *testing.B) {
 
 	time.Sleep(200 * time.Millisecond)
 	cancel()
+}
+
+func BenchmarkGoChannel(b *testing.B) {
+	ch := make(chan int, 4096)
+	done := make(chan struct{})
+
+	go func() {
+		for {
+			select {
+			case <-ch:
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ch <- i
+	}
+	close(done)
+}
+
+func BenchmarkGoChannelBatch(b *testing.B) {
+	ch := make(chan int, 4096)
+	done := make(chan struct{})
+	items := make([]int, 10)
+	for i := 0; i < 10; i++ {
+		items[i] = i
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ch:
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, v := range items {
+			ch <- v
+		}
+	}
+	close(done)
+}
+
+func BenchmarkGoroutinePerMessage(b *testing.B) {
+	var wg sync.WaitGroup
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		wg.Add(1)
+		go func(v int) {
+			_ = v
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
 }
