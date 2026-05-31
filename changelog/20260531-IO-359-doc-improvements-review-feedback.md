@@ -39,16 +39,27 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 11 | Benchmarks section | Throughput, allocations/op, p95 latency from bench/ results in README | Medium | 1h |
 | 12 | Per-key concurrency | `ConcurrencyKey` — same key serialized, different keys parallel (new feature, future) | N/A | deferred |
 
-**Total estimate (items 1-9, 11):** ~4h
+**Total estimate (items 1-9, 11):** ~3.5h (completed)
 
-### Implementation Approach
+### Implementation Status
 
-Items 1-6 and 9 are README additions. Items 7-8 require research for accurate comparisons. Item 10 is a larger restructuring. Item 11 requires running benchmarks first.
+**Done (9 of 12):**
+- README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
+- README: updated tagline to "cloud-native async execution runtime"
+- RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results (Intel i5, 27.4M msg/s ring batch, 2.5M msg/s pipeline)
+- bench/: added Go channel and goroutine-per-message comparisons
 
-**Phase A (this session):** Items 1-6, 9 — README sections (Quick wins)
-**Phase B (this session):** Items 7-8 — Comparison + retry expansion
-**Phase C (future):** Items 10-11 — Docs split + benchmarks
-**Phase D (future):** Item 12 — New feature
+**Remaining (2 of 12):**
+- Item 10: Split /docs/ folder (Phase C, ~2h)
+- Item 12: Per-key concurrency feature (Phase D, deferred — new feature)
+
+### Approach
+
+Phase A (items 1-6, 9): README additions.
+Phase B (items 7-8): Comparison + retry expansion.
+Phase C (item 11): Benchmarks with actual results.  ⬅ we are here
+Phase C (item 10): Docs split — deferred.
+Phase D (item 12): New feature — deferred.
 
 ---
 
@@ -74,5 +85,5 @@ Items 1-6 and 9 are README additions. Items 7-8 require research for accurate co
 | 8 | Retry docs expansion | Done | B |
 | 9 | Idempotency failure windows | Done | A |
 | 10 | Split /docs/ folder | Pending | C |
-| 11 | Benchmarks section | Pending | C |
+| 11 | Benchmarks section | Done | C |
 | 12 | Per-key concurrency | Deferred | D |
