@@ -121,44 +121,57 @@ Messages are received concurrently from the transport, queued into a bounded rin
 | Layer | Concurrency | Detail |
 |---|---|---|
 | Transport intake | Concurrent | SQS long-poll / Pub/Sub streaming pull run in dedicated goroutines |
-| Ring buffer | Serialized (lock-minimized) | Single-producer enqueue, single-consumer batch dequeue |
+| Ring buffer | Mutex-protected, MPSC | Single consumer (dispatcher) batch-dequeues; multi-producer (poller + retries) enqueues |
 | Worker dispatch | Parallel | Messages distributed across WorkerCount goroutines |
 | Handler execution | Parallel | Handlers may execute simultaneously on different CPU cores |
 
-The runtime **never creates unbounded goroutines** — parallelism is capped at `WorkerCount`. If the ring buffer fills up, backpressure propagates via the configured overflow policy (Block, Drop, or Reject).
+**Ring buffer:** bounded circular queue, mutex-protected, power-of-two sizing with bitwise AND mask. Supports Block, DropNewest, DropOldest, Reject overflow policies. Atomic head/tail for lock-free `Len()` visibility.
 
-### Ordering & Parallelism
+> **Bottleneck note:** The single-consumer dispatcher may bottleneck before workers saturate under extreme throughput. Benchmark your workload. Per-key concurrency (planned) will add partition lanes to mitigate this.
 
-Messages **may process out of order** across workers. FIFO is not guaranteed. If per-entity ordering is required, use a single worker (`Concurrency(1)`) or partition keys (planned).
+#### Worker Lifecycle
+
+- One worker = one goroutine. Fixed at startup via `WorkerCount`.
+- Handlers are **not reused** — each message invokes a fresh handler call.
+- **Retry immediately re-enqueues** into the ring buffer (occupies a worker slot).
+- **RetryWithDelay** uses transport Nack (SQS visibility timeout / Pub/Sub ack deadline) — does not occupy a worker slot while waiting.
+- **Delayed tasks** (NotBefore) are held in the timer wheel, not the ring buffer — no worker slot consumed until ETA.
+
+#### Ordering Guarantees
+
+Messages **may process out of order** across workers. Specifically:
+
+- FIFO is **not guaranteed** — ring buffer insertion order ≠ execution order
+- Retries can reorder relative to new messages
+- Same-entity messages (e.g., same `user_id`) **can race** across different workers
+- For per-entity ordering, use `Concurrency(1)` or partition keys (planned)
+
+The runtime prioritizes bounded parallel execution over strict ordering.
+
+### Parallelism & Tuning
 
 Each worker runs in its own goroutine. Handlers execute in parallel across available CPU cores. Throughput scales with `WorkerCount`:
 
-| Workload | Recommended WorkerCount |
-|---|---|
-| I/O-bound (HTTP, DB) | 32–128 |
-| CPU-bound (encryption, serialization) | `GOMAXPROCS` |
-| Mixed | 16–64 |
-
-### Backpressure
-
-The ring buffer has a fixed capacity set via `BufferSize`. When the buffer is full, the configured overflow policy determines behavior:
-
-| Policy | Behavior | Use case |
+| Workload | Recommended WorkerCount | Rationale |
 |---|---|---|
-| `Block` | Producer waits until a slot frees | When message loss is unacceptable |
-| `DropNewest` | Incoming message discarded | When freshest data is least critical |
-| `DropOldest` | Oldest queued message overwritten | When staleness matters more than completeness |
-| `Reject` | Returns `ErrBufferFull` to caller | When caller should handle backpressure |
+| I/O-bound (HTTP, DB, webhooks) | 32–128 | Goroutines efficiently block on I/O; higher counts maximize throughput |
+| CPU-bound (encryption, serialization) | `GOMAXPROCS` (typically 4–8) | Extra goroutines cause scheduler contention |
+| Mixed (notifications, payment callbacks) | 16–64 | Balance between I/O wait and CPU utilization |
 
-At the transport level, SQS and Pub/Sub provide additional backpressure via visibility timeout and ack deadline — messages stay in the queue until acknowledged. Combined with the ring buffer, this creates a two-tier backpressure system:
+**RingBufferSize:** Sized to absorb transport intake bursts. A 4096-slot buffer at 64 workers provides ~64 messages of burst headroom per worker before backpressure activates. Increase for spiky workloads; decrease for memory-constrained environments.
+
+### Transport Latency Smoothing
+
+The ring buffer's most important operational benefit is **absorbing transport bursts**. Cloud message brokers (SQS, Pub/Sub) deliver messages in spikes — the ring buffer decouples bursty intake from steady worker execution:
 
 ```
-Transport (SQS/PubSub) → Ring Buffer → Workers
-   ↑ visibility keeps msg     ↑ policy decides
-     in queue if unacked        what happens when full
+Transport (bursty) → Ring Buffer (smoothing) → Workers (steady)
+
+   SQS delivers 50 msg    Buffer absorbs spike    Workers process at
+   in one ReceiveMessage   queues them in slots    consistent pace
 ```
 
-For multi-pod deployments, scale horizontally with KEDA (SQS queue depth) or HPA (CPU/memory). Per-pod buffer size stays fixed; total capacity scales with pod count.
+This is more valuable than raw throughput — it prevents CPU thrashing, visibility timeout expiry, and retry amplification during traffic spikes. The architecture is designed for **predictable bounded parallel execution**, not maximum speed at all costs.
 
 ## Features
 
@@ -285,6 +298,22 @@ task e2e-gcp     # GCP Pub/Sub e2e (requires Docker + GCloud emulator)
 task e2e-all     # all e2e tests
 task all         # lint + test + e2e
 ```
+
+## Benchmarks
+
+Quick reference from `go test -bench=. ./bench/` (Intel i5-8257U, 4-core/8-thread, Go 1.21):
+
+| Benchmark | ns/op | Throughput |
+|---|---|---|
+| Ring buffer single enqueue/dequeue | 63 | ~15.7M ops/s |
+| Ring buffer batch (10 items) | 365 | ~27.4M msg/s |
+| Full pipeline (64 workers, InMemory) | 395 | ~2.5M msg/s |
+| Go channel (single) | 121 | ~8.3M ops/s |
+| Goroutine per message | 314 | ~3.2M ops/s |
+
+Ring buffer batch operations are **3.3x faster** than equivalent Go channel batches. Full pipeline throughput includes transport publish, ring buffer, dispatch, worker execution, and handler — all bounded by the worker pool.
+
+> See [RING-BUFFER.md](RING-BUFFER.md) for full benchmark methodology, latency distribution, and analysis.
 
 ## Status
 

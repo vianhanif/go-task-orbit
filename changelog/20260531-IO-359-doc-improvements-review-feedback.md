@@ -48,17 +48,17 @@ Current docs describe *what* the library does but not *why* the architecture cho
 
 ### Implementation Status
 
-**Done (9 of 21):**
+**Done (17 of 21):**
 - README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
 - README: updated tagline to "cloud-native async execution runtime"
 - RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results
 - bench/: added Go channel and goroutine-per-message comparisons
 
-**Remaining (12 of 21):**
+**Remaining (4 of 21):**
 - Item 10: Split /docs/ folder (deferred)
 - Item 12: Per-key concurrency feature (deferred)
-- Items 13-17: Worker lifecycle, bottleneck, latency, repositioning, flow diagrams (Phase A)
-- Items 18-21: Ordering, ring buffer details, tuning, benchmark exposure (Phase A, 2nd review)
+- Item 17: Flow diagrams (deferred — needs visual work)
+- Items 1-16, 18-21: Complete
 
 ### Phase Summary
 
@@ -95,15 +95,15 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 10 | Split /docs/ folder | Pending | C |
 | 11 | Benchmarks section | Done | C |
 | 12 | Per-key concurrency | Deferred | D |
-| 13 | Worker lifecycle docs | Pending | A |
-| 14 | Ring buffer bottleneck note | Pending | A |
-| 15 | Transport latency smoothing | Pending | A |
-| 16 | Reposition: predictable bounded execution | Pending | A |
+| 13 | Worker lifecycle docs | Done | A |
+| 14 | Ring buffer bottleneck note | Done | A |
+| 15 | Transport latency smoothing | Done | A |
+| 16 | Reposition: predictable bounded execution | Done | A |
 | 17 | Flow diagrams | Pending | A |
-| 18 | Ordering guarantees section (2nd review) | Pending | A |
-| 19 | Ring buffer implementation details (2nd review) | Pending | A |
-| 20 | Parallelism tuning guidance table (2nd review) | Pending | A |
-| 21 | Benchmark summary in README (2nd review) | Pending | A |
+| 18 | Ordering guarantees section (2nd review) | Done | A |
+| 19 | Ring buffer implementation details (2nd review) | Done | A |
+| 20 | Parallelism tuning guidance table (2nd review) | Done | A |
+| 21 | Benchmark summary in README (2nd review) | Done | A |
 
 ---
 
