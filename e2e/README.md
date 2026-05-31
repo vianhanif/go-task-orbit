@@ -32,7 +32,10 @@ Both transports share the same test scenarios. Each test:
 | 4 | Idempotency | SQS, Pub/Sub | Two messages with same key → handler called once, duplicate filtered |
 | 5 | BatchReceive | SQS, Pub/Sub | N messages published → all N processed by handler(s) |
 | 6 | GracefulShutdown | SQS | Slow handler in-flight → cancel context → handler completes before exit |
-| 7 | UnknownTopic | SQS, Pub/Sub | Message to unregistered topic → OnError hook fired |
+| 7 | UnknownTopic | SQS, Pub/Sub | Message to unregistered topic → OnError hook fired → routed to DLQ |
+| 8 | ETADelayedTask | SQS, Pub/Sub | Message with NotBefore=3s → held in timer wheel → processed after delay |
+| 9 | ETAImmediateTask | SQS | Message with NotBefore=0 → processed immediately |
+| 10 | ETAExponentialBackoff | SQS | Handler returns Retry repeatedly → delays grow exponentially
 
 ## Run Locally
 
@@ -57,49 +60,64 @@ Latest run: **2026-05-30** — [All passing](https://github.com/vianhanif/go-tas
 
 ```
 === RUN   TestE2EHappyPath
-    ✅ published: hello → handler called, acked
---- PASS: TestE2EHappyPath (2.51s)
+    ✅ pipeline started → published → handler called → acked
+--- PASS: TestE2EHappyPath (5.51s)
 === RUN   TestE2ERetryThenAck
-    ✅ published: retry-me → failed (attempt 1) → retried → succeeded (attempt 2)
---- PASS: TestE2ERetryThenAck (5.51s)
+    ✅ published → handler failed (attempt 1) → retried → succeeded (attempt 2)
+--- PASS: TestE2ERetryThenAck (8.51s)
 === RUN   TestE2EDLQ
-    ✅ published: fail → handler returned DLQ → OnError fired → sent to DLQ
---- PASS: TestE2EDLQ (2.51s)
+    ✅ published → handler returned DLQ → OnError fired → sent to DLQ
+--- PASS: TestE2EDLQ (5.51s)
 === RUN   TestE2EIdempotency
     ✅ published 2 messages (same key) → handler called once, duplicate acked
---- PASS: TestE2EIdempotency (4.51s)
+--- PASS: TestE2EIdempotency (8.51s)
 === RUN   TestE2EBatchReceive
     ✅ published 5 messages → all 5 processed
---- PASS: TestE2EBatchReceive (3.51s)
+--- PASS: TestE2EBatchReceive (5.51s)
 === RUN   TestE2EGracefulShutdown
-    ✅ published slow → cancel → inflight drained → handler completed
---- PASS: TestE2EGracefulShutdown (2.01s)
+    ✅ published slow message → cancel → inflight drained → handler completed
+--- PASS: TestE2EGracefulShutdown (4.01s)
 === RUN   TestE2EUnknownTopic
     ✅ published to unknown topic → OnError fired → routed to DLQ
---- PASS: TestE2EUnknownTopic (2.51s)
+--- PASS: TestE2EUnknownTopic (5.52s)
+=== RUN   TestE2EETADelayedTask
+    ✅ published with NotBefore=3s → held in timer → processed after delay
+--- PASS: TestE2EETADelayedTask (6.52s)
+=== RUN   TestE2EETAImmediateTask
+    ✅ published with NotBefore=0 → processed immediately
+--- PASS: TestE2EETAImmediateTask (3.51s)
+=== RUN   TestE2EETAExponentialBackoff
+    ✅ published → retries with growing delay → DLQ after max attempts
+--- PASS: TestE2EETAExponentialBackoff (30.51s)
 ```
 
 ### GCP Pub/Sub (Google Emulator)
 
 ```
 === RUN   TestE2EGCPHappyPath
-    ✅ published: hello-gcp → handler called, acked
---- PASS: TestE2EGCPHappyPath (5.61s)
-=== RUN   TestE2EGCPRetry
-    ✅ published: retry-me → failed (attempt 1) → retried → succeeded (attempt 2)
---- PASS: TestE2EGCPRetry (8.53s)
+    ✅ published → handler called → acked
+--- PASS: TestE2EGCPHappyPath (5.52s)
+=== RUN   TestE2EGCPRetryThenAck
+    ✅ published → handler failed (attempt 1) → retried → succeeded (attempt 2)
+--- PASS: TestE2EGCPRetryThenAck (8.52s)
 === RUN   TestE2EGCPDLQ
-    ✅ published: fail → handler returned DLQ → OnError fired → Nacked
+    ✅ published → handler returned DLQ → OnError fired → Nacked
 --- PASS: TestE2EGCPDLQ (5.52s)
 === RUN   TestE2EGCPIdempotency
     ✅ published 2 messages (same key) → handler called once, duplicate filtered
 --- PASS: TestE2EGCPIdempotency (8.53s)
-=== RUN   TestE2EGCPBatch
+=== RUN   TestE2EGCPBatchReceive
     ✅ published 5 messages → all 5 processed
---- PASS: TestE2EGCPBatch (5.57s)
+--- PASS: TestE2EGCPBatchReceive (5.56s)
 === RUN   TestE2EGCPUnknownTopic
     ✅ published to unknown topic → OnError fired → Nacked
 --- PASS: TestE2EGCPUnknownTopic (5.52s)
+=== RUN   TestE2EGCPETADelayedTask
+    ✅ published with NotBefore=3s → held in timer → processed after delay
+--- PASS: TestE2EGCPETADelayedTask (6.62s)
+=== RUN   TestE2EGCPETABackoff
+    ⏭ skipped — Pub/Sub Nack redelivery resets attempt counter
+--- SKIP: TestE2EGCPETABackoff (0.00s)
 ```
 
 ## Adding New E2E Tests

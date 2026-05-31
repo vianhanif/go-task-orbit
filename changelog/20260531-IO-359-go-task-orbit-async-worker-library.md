@@ -26,17 +26,17 @@ The current `go-workers` library has two primary pain points:
 The library targets `core-api` as its first consumer (I/O-bound + DB-bound workloads: network calls, database operations) running on EKS with KEDA-driven autoscaling.
 
 #### Success criteria
-- [ ] SQS transport with batch receive, batch ack, batch visibility extension
-- [ ] In-memory ring buffer as local execution scheduler (no Redis dependency)
-- [ ] Bounded worker pool (configurable concurrency, no goroutine explosion)
-- [ ] Library-managed idempotency (dedupe via SQS MessageAttributes, pluggable store)
-- [ ] Explicit handler result model (Ack, Retry, RetryWithDelay, DLQ)
-- [ ] Hook-based observability (OnReceive, OnDispatch, OnComplete, OnError, OnRetry, OnDuplicate)
-- [ ] Graceful shutdown (SIGTERM → stop polling → drain inflight → ack → exit)
-- [ ] Native SQS DLQ support
-- [ ] Pipeline/builder chain API with topic-based routing
-- [ ] At-least-once delivery with idempotency layer
-- [ ] Go 1.19 compatible
+- [x] SQS transport with batch receive, batch ack, batch visibility extension
+- [x] In-memory ring buffer as local execution scheduler (no Redis dependency)
+- [x] Bounded worker pool (configurable concurrency, no goroutine explosion)
+- [x] Library-managed idempotency (dedupe via SQS MessageAttributes, pluggable store)
+- [x] Explicit handler result model (Ack, Retry, RetryWithDelay, DLQ)
+- [x] Hook-based observability (OnReceive, OnDispatch, OnComplete, OnError, OnRetry, OnDuplicate)
+- [x] Graceful shutdown (SIGTERM → stop polling → drain inflight → ack → exit)
+- [x] Native SQS DLQ support
+- [x] Pipeline/builder chain API with topic-based routing
+- [x] At-least-once delivery with idempotency layer
+- [x] Go 1.21+ compatible
 
 ---
 
@@ -143,7 +143,7 @@ The library is designed for horizontal scaling across multiple pod replicas in E
 | 4 | Ring buffer scheduler | Integrate existing ring lib, batch enqueue, batch dispatch, backpressure policies | Medium | Mid | 3h |
 | 5 | Worker pool (executor) | Bounded goroutine pool, concurrency config, graceful drain | Medium | Mid | 2h |
 | 6 | Idempotency layer | IdemStore interface, MemoryStore + RedisStore implementations, SQS attribute key, TTL, OnDuplicate hook | Medium | Mid | 3h |
-| 7 | Retry engine + DLQ coordinator | Explicit Result handling (Ack/Retry/DLQ), immediate retry via ring re-insert. RetryWithDelay re-uses SQS visibility timeout (no timer wheel in v1) | Medium | Mid | 3h |
+| 7 | Retry engine + DLQ coordinator | Explicit Result handling (Ack/Retry/DLQ), immediate retry via ring re-insert. RetryWithDelay via timer wheel. Exponential backoff as default. | Medium | Mid | 3h |
 | 8 | Pipeline builder API | Builder chain (Transport, Handle, Idempotency, Hooks, Concurrency, BufferSize, Run) | Medium | Mid | 3h |
 | 9 | Hook system + observability | Lifecycle hooks, OTel wiring examples (not OTel dependency) | Low | Fast | 1h |
 | 10 | Graceful shutdown | SIGTERM handling, poller stop, inflight drain, final ack, context cancellation | Medium | Mid | 2h |
@@ -263,7 +263,7 @@ type IdemStore interface {
 | Explicit Result type over error-only | Handlers need fine-grained control: retry with delay, skip to DLQ, ack silently |
 | Raw `[]byte` transport, default JSON codec | No opinion on serialization; typed handlers get default JSON, raw handlers get bytes |
 | At-least-once with idempotency | Adequate for I/O-bound + DB-bound workloads; simpler than exactly-once |
-| Go 1.21 target | Required for GCP Pub/Sub transport (`cloud.google.com/go/pubsub`). Upgraded from original 1.19 constraint. |
+| Go 1.21 target | Required for cloud.google.com/go/pubsub. Upgraded from original 1.19 constraint. Compatible with core-api after its Go upgrade. |
 | Batch APIs everywhere internally | Massive SQS cost reduction, higher throughput |
 | Task (taskfile.dev) as build tool | Single YAML-based task runner for test/lint/e2e. Replaces raw shell scripts. Cross-platform, single binary. |
 
@@ -277,8 +277,6 @@ type IdemStore interface {
 - Distributed coordination / leader election
 - Exactly-once semantics
 - FIFO queue support
-- Delayed job scheduling (timer wheel)
-- Advanced retry backoff strategies (exponential, jitter)
 - Admin UI / dashboard
 - Metrics export (Prometheus/CloudWatch endpoints) — hooks enable this, but library won't ship it
 
@@ -353,7 +351,7 @@ go-task-orbit/
 | Risk | Mitigation |
 |---|---|
 | Ring buffer library selection | Evaluate 2-3 options (gammazero/deque, etc.) before committing; benchmark with SQS-like workloads |
-| Go 1.19 constraint limits stdlib | Acceptable; generics + atomics available; no `slog` means structured logging left to caller |
+| Go 1.21 constraint | Generics + atomics available; `log/slog` available (1.21+). Structured logging left to caller. |
 | SQS batch API complexity | Well-documented AWS SDK v2; batch size/visibility coordination is the main challenge |
 | Idempotency store consistency | MemoryStore is pod-local — not safe for multi-replica production. RedisStore required for >1 pod. Library will log a warning if MemoryStore is used with known multi-replica config |
 | Graceful drain timing | EKS SIGTERM gives 30s default; library must drain within this window or risk duplicate processing |
@@ -368,7 +366,7 @@ go-task-orbit/
 3. Message payloads fit in SQS size limits (256KB)
 4. Single-producer, multi-consumer model per queue
 5. EKS pods have IAM roles for SQS access (IRSA)
-6. The existing ring buffer library chosen will be Go 1.19 compatible
+6. The existing ring buffer library chosen will be Go 1.21+ compatible
 
 ---
 

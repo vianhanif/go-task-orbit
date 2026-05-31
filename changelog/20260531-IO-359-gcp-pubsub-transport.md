@@ -112,7 +112,7 @@ Phase 2 could add multi-topic support (one Pub/Sub topic per go-task-orbit topic
 | 7 | SendToDLQ implementation | `msg.Nack()` — relies on subscription-level dead letter topic policy. No separate DLQ topic needed. | Low | Fast | 0.3h |
 | 8 | Message conversion | Pub/Sub `*pubsub.Message` ↔ `ringq.Message` (data, attributes, message ID) | Low | Fast | 0.5h |
 | 9 | Unit tests | Test Publish/Subscribe/Ack/Nack using floci-gcp emulator | Medium | Mid | 2h |
-| 10 | E2E tests | Full pipeline e2e with floci-gcp — same 8 scenarios as SQS e2e (happy path, retry, DLQ, idempotency, batch, etc.) | Medium | Mid | 2h |
+| 10 | E2E tests | Full pipeline e2e with floci-gcp — 6 core scenarios (happy path, retry, DLQ, idempotency, batch, unknown topic) + ETA delay | Medium | Mid | 2h |
 | 11 | Taskfile.yml update | Add GCP e2e tasks (floci-gcp-start/stop, e2e-gcp, e2e-gcp-ci) to existing Taskfile | Low | Fast | 0.5h |
 | 12 | Documentation | README update (transport table), godoc, example code, SQS vs Pub/Sub comparison | Low | Fast | 1h |
 

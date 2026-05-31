@@ -110,7 +110,8 @@ pipeline.Run(ctx)
 | **Amazon SQS** | Supported | HTTP (REST) | AWS production — batch receive/ack, native DLQ |
 | **GCP Pub/Sub** | Supported | gRPC | GCP production — streaming pull, subscription-level DLQ |
 | **In-Memory** | Supported | In-process | Development / testing — zero dependencies |
-| Redis Streams | Planned | TCP | Alternative production transport |
+| **Redis Streams** | Planned | TCP (RESP) | Durable Redis job processing — consumer groups, XACK |
+| **Redis Pub/Sub** | Planned | TCP (RESP) | Fire-and-forget real-time broadcast messaging |
 | Kafka | Planned | TCP | Event-driven architectures |
 | MySQL | Planned | TCP | Transactional job queues |
 

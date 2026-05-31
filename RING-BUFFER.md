@@ -146,7 +146,7 @@ Go Channel (batch 10):     ██                                830,000 batch/s
 | Go Channel (batch 10) | 1206 | 0 | 0 | ~8.3M msg/s |
 | Goroutine per message | 314 | 40 | 2 | ~3.2M ops/s |
 
-**Environment:** macOS, Intel i5-8257U @ 1.40GHz (4-core/8-thread), Go 1.25
+**Environment:** macOS, Intel i5-8257U @ 1.40GHz (4-core/8-thread), Go 1.21
 
 ### Key Findings
 

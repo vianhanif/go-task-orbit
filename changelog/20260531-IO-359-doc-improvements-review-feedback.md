@@ -46,20 +46,22 @@ Current docs describe *what* the library does but not *why* the architecture cho
 **Done (9 of 12):**
 - README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
 - README: updated tagline to "cloud-native async execution runtime"
-- RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results (Intel i5, 27.4M msg/s ring batch, 2.5M msg/s pipeline)
+- RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results
 - bench/: added Go channel and goroutine-per-message comparisons
 
-**Remaining (2 of 12):**
-- Item 10: Split /docs/ folder (Phase C, ~2h)
-- Item 12: Per-key concurrency feature (Phase D, deferred — new feature)
+**Remaining (3 of 12):**
+- Item 10: Split /docs/ folder (deferred)
+- Item 11: Benchmarks — completed ✓
+- Item 12: Per-key concurrency feature (deferred — new feature)
 
-### Approach
+### Phase Summary
 
-Phase A (items 1-6, 9): README additions.
-Phase B (items 7-8): Comparison + retry expansion.
-Phase C (item 11): Benchmarks with actual results.  ⬅ we are here
-Phase C (item 10): Docs split — deferred.
-Phase D (item 12): New feature — deferred.
+| Phase | Items | Status |
+|---|---|---|
+| A | 1-6, 9 | Complete |
+| B | 7-8 | Complete |
+| C | 10-11 | Item 11 done, item 10 deferred |
+| D | 12 | Deferred |
 
 ---
 
