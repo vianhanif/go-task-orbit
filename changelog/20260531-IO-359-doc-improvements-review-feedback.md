@@ -57,3 +57,22 @@ Items 1-6 and 9 are README additions. Items 7-8 require research for accurate co
 - [x] Source: External ChatGPT review of repo docs
 - [x] Changes: README additions and new /docs/ files
 - [x] No code changes — documentation only
+
+---
+
+### Progress Checklist
+
+| # | Item | Status | Phase |
+|---|---|---|---|
+| 1 | "Why Ring Buffer" section | Done | A |
+| 2 | Better positioning (tagline) | Done | A |
+| 3 | Concurrency model section | Done | A |
+| 4 | Parallel execution section | Done | A |
+| 5 | Ordering semantics | Done | A |
+| 6 | Backpressure section | Done | A |
+| 7 | Comparison table | Done | B |
+| 8 | Retry docs expansion | Done | B |
+| 9 | Idempotency failure windows | Done | A |
+| 10 | Split /docs/ folder | Pending | C |
+| 11 | Benchmarks section | Pending | C |
+| 12 | Per-key concurrency | Deferred | D |

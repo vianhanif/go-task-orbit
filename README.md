@@ -1,6 +1,6 @@
 # go-task-orbit
 
-Async worker library for Go with ring-buffer scheduling and pluggable transport backends (SQS, Pub/Sub, In-Memory).
+Cloud-native async execution runtime for Go — ring-buffer scheduling, pluggable transport backends (SQS, Pub/Sub, In-Memory).
 
 **Module:** `github.com/vianhanif/go-task-orbit`
 
@@ -12,7 +12,7 @@ Async worker library for Go with ring-buffer scheduling and pluggable transport 
 
 ## Overview
 
-`go-task-orbit` is an async job processing runtime that combines cloud message brokers with in-process ring-buffer scheduling. It replaces the legacy `go-workers` library with a modern, observable, multi-cloud architecture.
+`go-task-orbit` is a cloud-native async execution runtime that combines cloud message brokers with in-process ring-buffer scheduling. It replaces the legacy `go-workers` library with bounded concurrency, predictable latency, and multi-cloud support.
 
 ### Architecture
 
@@ -23,6 +23,26 @@ Transport (SQS / Pub/Sub / In-Memory) → Ring Buffer → Idempotency Filter →
 - **Transport** handles durability, cross-pod delivery, and protocol-specific I/O
 - **Ring buffer** handles local scheduling, backpressure, and concurrency control
 - **Worker pool** provides bounded goroutine execution (no goroutine explosion)
+
+### Why Ring Buffer?
+
+Traditional Go worker libraries often use channels or goroutine-per-message patterns. These scale poorly under load:
+
+| Pattern | Problem |
+|---|---|
+| `go handler(msg)` | Unbounded goroutine creation → CPU thrashing, memory spikes |
+| `ch <- msg` | Single consumer, no fan-out, blocks producer on backpressure |
+| `for msg := range ch` | No batch reads, poor cache locality, no overflow policies |
+
+The ring buffer solves this by:
+
+- **Bounded memory** — pre-allocated, fixed-size, never grows. No GC pressure.
+- **Batch I/O** — drain N items in one pass. 10x fewer dispatcher wake-ups.
+- **Cache locality** — contiguous slots. CPU prefetcher works.
+- **Overflow policies** — Block, DropNewest, DropOldest, or Reject when full. Channels only block.
+- **Predictable latency** — no heap allocation per message, no goroutine scheduling jitter.
+
+> See [RING-BUFFER.md](RING-BUFFER.md) for detailed comparisons, flow diagrams, and performance analysis.
 
 ## Quick Start
 
@@ -94,6 +114,52 @@ pipeline.Run(ctx)
 | Kafka | Planned | TCP | Event-driven architectures |
 | MySQL | Planned | TCP | Transactional job queues |
 
+### Concurrency Model
+
+Messages are received concurrently from the transport, queued into a bounded ring buffer, then processed by a fixed-size worker pool.
+
+| Layer | Concurrency | Detail |
+|---|---|---|
+| Transport intake | Concurrent | SQS long-poll / Pub/Sub streaming pull run in dedicated goroutines |
+| Ring buffer | Serialized (lock-minimized) | Single-producer enqueue, single-consumer batch dequeue |
+| Worker dispatch | Parallel | Messages distributed across WorkerCount goroutines |
+| Handler execution | Parallel | Handlers may execute simultaneously on different CPU cores |
+
+The runtime **never creates unbounded goroutines** — parallelism is capped at `WorkerCount`. If the ring buffer fills up, backpressure propagates via the configured overflow policy (Block, Drop, or Reject).
+
+### Ordering & Parallelism
+
+Messages **may process out of order** across workers. FIFO is not guaranteed. If per-entity ordering is required, use a single worker (`Concurrency(1)`) or partition keys (planned).
+
+Each worker runs in its own goroutine. Handlers execute in parallel across available CPU cores. Throughput scales with `WorkerCount`:
+
+| Workload | Recommended WorkerCount |
+|---|---|
+| I/O-bound (HTTP, DB) | 32–128 |
+| CPU-bound (encryption, serialization) | `GOMAXPROCS` |
+| Mixed | 16–64 |
+
+### Backpressure
+
+The ring buffer has a fixed capacity set via `BufferSize`. When the buffer is full, the configured overflow policy determines behavior:
+
+| Policy | Behavior | Use case |
+|---|---|---|
+| `Block` | Producer waits until a slot frees | When message loss is unacceptable |
+| `DropNewest` | Incoming message discarded | When freshest data is least critical |
+| `DropOldest` | Oldest queued message overwritten | When staleness matters more than completeness |
+| `Reject` | Returns `ErrBufferFull` to caller | When caller should handle backpressure |
+
+At the transport level, SQS and Pub/Sub provide additional backpressure via visibility timeout and ack deadline — messages stay in the queue until acknowledged. Combined with the ring buffer, this creates a two-tier backpressure system:
+
+```
+Transport (SQS/PubSub) → Ring Buffer → Workers
+   ↑ visibility keeps msg     ↑ policy decides
+     in queue if unacked        what happens when full
+```
+
+For multi-pod deployments, scale horizontally with KEDA (SQS queue depth) or HPA (CPU/memory). Per-pod buffer size stays fixed; total capacity scales with pod count.
+
 ## Features
 
 - **Multi-cloud transport** — SQS (batch I/O), Pub/Sub (gRPC streaming), In-Memory (dev/test)
@@ -123,10 +189,38 @@ func SendEmailHandler(ctx context.Context, msg EmailPayload) ringq.Result {
     }
     return ringq.Result{Action: ringq.Ack}
 }
-
-// Retry with explicit max retries:
-pipeline.HandleWithRetry("email.send", ringq.Wrap(SendEmailHandler), 3, 5*time.Second, nil)
 ```
+
+## Retry & DLQ
+
+Handlers return a `Result` with one of four actions:
+
+| Action | Behavior | Transport interaction |
+|---|---|---|
+| `Ack` | Message deleted from queue | SQS: `DeleteMessageBatch` / Pub/Sub: `msg.Ack()` |
+| `Retry` | Re-enqueued into ring buffer | No transport call — local ring re-insert |
+| `RetryWithDelay` | Re-enqueued after delay | SQS: `ChangeMessageVisibility` / Pub/Sub: `msg.Nack()` |
+| `DLQ` | Routed to dead letter queue | SQS: `SendMessage` to DLQ URL / Pub/Sub: `msg.Nack()` (subscription DLQ policy) |
+
+### Exponential Backoff (Default)
+
+Retry delays grow exponentially: `min(baseDelay * 2^(attempt-1), 5min)`. Default: 10 max retries, 1s base delay.
+
+```
+Attempt 1 → immediate
+Attempt 2 → 1s delay
+Attempt 3 → 2s delay
+Attempt 4 → 4s delay
+...
+Attempt 10 → 256s delay (capped at 5min)
+Attempt 11 → DLQ
+```
+
+Override via `HandleWithRetry(topic, handler, maxRetries, baseDelay, coordinator)`.
+
+### Retry State
+
+Retry state is **in-memory** (`ringq.Message.Attempts`). For SQS/Pub/Sub, transport redelivery resets the counter. The idempotency layer prevents duplicate side effects. Handlers should remain idempotent regardless.
 
 ## Observability
 
@@ -141,7 +235,7 @@ pipeline.WithHooks(ringq.Hooks{
 })
 ```
 
-**All hooks are optional.** The library has zero OpenTelemetry dependency — hooks are plain functions your team wires up.
+**All hooks are optional.** The library has zero OpenTelemetry dependency.
 
 ## Idempotency
 
@@ -164,6 +258,19 @@ pipeline.Idempotency(ringq.IdempotencyConfig{
 ```
 
 > **Important:** `MemoryStore` is pod-local. In multi-replica deployments, use `RedisStore`.
+
+### Failure Windows
+
+Idempotency prevents duplicate processing within the library lifecycle, but there are edge cases handlers should account for:
+
+| Scenario | Can duplicate? | Why |
+|---|---|---|
+| Normal flow | No | IdemStore checked before handler, marked after Ack |
+| Crash between handler success and Ack | **Yes** | Transport redelivers unacknowledged message |
+| Crash between Mark and Ack | No | Mark already persisted, duplicate filtered on redelivery |
+| Multi-pod with MemoryStore | **Yes** | Each pod has independent in-memory store |
+
+**Best practice:** handlers should be side-effect safe regardless. For example, use idempotency keys in external API calls, or make database writes idempotent via `INSERT ... ON CONFLICT DO NOTHING`.
 
 ## Build Tool
 
@@ -198,6 +305,24 @@ task all         # lint + test + e2e
 | GitHub Actions CI | Done |
 | Redis Streams | Planned |
 | Kafka | Planned |
+
+## Comparison
+
+| Library | Model | Scheduling | Transport | Best for |
+|---|---|---|---|---|
+| **go-task-orbit** | Ring buffer + bounded workers | Lock-minimized, overflow policies | SQS, Pub/Sub, In-Memory | Cloud-native async execution |
+| [go-workers](https://github.com/jrallison/go-workers) | Redis polling | Goroutine pool | Redis only | Sidekiq-compatible jobs |
+| [Asynq](https://github.com/hibiken/asynq) | Redis queues | Task retry with backoff | Redis only | Reliable task queues |
+| [Temporal](https://temporal.io/) | Workflow engine | Durable state machines | Multi-protocol | Complex orchestrations |
+| [Watermill](https://github.com/ThreeDotsLabs/watermill) | Pub/Sub messaging | Event-driven | Kafka, RabbitMQ, Go channels | Event streaming |
+| Raw Go channels | In-process | Blocking send/receive | None | Simple goroutine sync |
+
+**Key differentiators:**
+
+- **Bounded concurrency** — no goroutine explosion. Asynq/go-workers use Redis BRPOP which spawns goroutines per job.
+- **Transport agnostic** — same API for SQS, Pub/Sub, In-Memory. Most alternatives are Redis-coupled.
+- **Ring buffer scheduling** — predictable latency and backpressure. Channels/Temporal don't provide buffer-level overflow policies.
+- **Not a workflow engine** — lighter than Temporal, no DAG orchestration, no durable state machines. Designed for microservice workloads.
 
 ## License
 
