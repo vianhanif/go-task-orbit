@@ -38,27 +38,32 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 10 | Split /docs/ folder | architecture.md, transports.md, retries.md, idempotency.md, concurrency.md, comparison.md | High | 2h |
 | 11 | Benchmarks section | Throughput, allocations/op, p95 latency from bench/ results in README | Medium | 1h |
 | 12 | Per-key concurrency | `ConcurrencyKey` — same key serialized, different keys parallel (new feature, future) | N/A | deferred |
+| 13 | Worker lifecycle docs | Clarify: one worker = one goroutine, handlers not reused, retry re-enqueues | Low | 0.3h |
+| 14 | Ring buffer bottleneck note | Document single-consumer dispatch may bottleneck before workers saturate | Low | 0.2h |
+| 15 | Transport latency smoothing | Highlight ring buffer as SQS/PubSub burst absorber — more important than raw throughput | Low | 0.2h |
+| 16 | Reposition: "predictable bounded parallel execution" | Avoid overselling "lock-free"/"high-performance". Position as predictable, not fastest. | Low | 0.1h |
+| 17 | Flow diagrams | Retry → DLQ lifecycle, shutdown draining sequence, receive loop | Medium | 1h |
 
 **Total estimate (items 1-9, 11):** ~3.5h (completed)
 
 ### Implementation Status
 
-**Done (9 of 12):**
+**Done (9 of 17):**
 - README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
 - README: updated tagline to "cloud-native async execution runtime"
 - RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results
 - bench/: added Go channel and goroutine-per-message comparisons
 
-**Remaining (3 of 12):**
+**Remaining (8 of 17):**
 - Item 10: Split /docs/ folder (deferred)
-- Item 11: Benchmarks — completed ✓
-- Item 12: Per-key concurrency feature (deferred — new feature)
+- Item 12: Per-key concurrency feature (deferred)
+- Items 13-17: Worker lifecycle, bottleneck note, latency smoothing, repositioning, flow diagrams
 
 ### Phase Summary
 
 | Phase | Items | Status |
 |---|---|---|
-| A | 1-6, 9 | Complete |
+| A | 1-6, 9, 13-17 | Items 1-6,9 done. Items 13-17 pending. |
 | B | 7-8 | Complete |
 | C | 10-11 | Item 11 done, item 10 deferred |
 | D | 12 | Deferred |
@@ -89,3 +94,8 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 10 | Split /docs/ folder | Pending | C |
 | 11 | Benchmarks section | Done | C |
 | 12 | Per-key concurrency | Deferred | D |
+| 13 | Worker lifecycle docs | Pending | A |
+| 14 | Ring buffer bottleneck note | Pending | A |
+| 15 | Transport latency smoothing | Pending | A |
+| 16 | Reposition: predictable bounded execution | Pending | A |
+| 17 | Flow diagrams | Pending | A |
