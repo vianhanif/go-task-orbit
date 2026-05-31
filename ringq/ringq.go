@@ -373,6 +373,7 @@ func (d defaultRetryCoordinator) Handle(_ context.Context, msg Message, result R
 			}
 		}
 		msg.Attempts = attempt
+		action := result.Action
 		delay := result.Delay
 		if delay <= 0 {
 			delay = d.baseDelay * time.Duration(int64(math.Pow(2, float64(attempt-1))))
@@ -380,7 +381,10 @@ func (d defaultRetryCoordinator) Handle(_ context.Context, msg Message, result R
 				delay = maxRetryDelay
 			}
 		}
-		return RetryOutcome{Action: result.Action, Message: msg, Delay: delay}
+		if delay > 0 {
+			action = RetryWithDelay
+		}
+		return RetryOutcome{Action: action, Message: msg, Delay: delay}
 
 	case DLQ:
 		return RetryOutcome{Action: DLQ, Message: msg, Err: result.Err}

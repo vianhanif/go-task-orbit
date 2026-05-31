@@ -73,8 +73,8 @@ func (t *Transport) Ack(_ context.Context, _ []ringq.Message) error {
 	return nil
 }
 
-func (t *Transport) Nack(_ context.Context, _ ringq.Message, _ time.Duration) error {
-	return nil
+func (t *Transport) Nack(_ context.Context, msg ringq.Message, _ time.Duration) error {
+	return t.Publish(context.Background(), msg)
 }
 
 func (t *Transport) SendToDLQ(_ context.Context, _ ringq.Message) error {
