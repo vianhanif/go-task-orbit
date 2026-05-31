@@ -29,7 +29,7 @@ func newSQSTransportWithVis(queueURL string, vis int32) *sqst.SQSTransport {
 
 func TestE2EHappyPath(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-happy")
+	queueURL, _ := env.createQueue(t, "e2e-happy")
 
 	var called int32
 	transport := newSQSTransport(queueURL)
@@ -71,7 +71,7 @@ func TestE2EHappyPath(t *testing.T) {
 
 func TestE2ERetryThenAck(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-retry")
+	queueURL, _ := env.createQueue(t, "e2e-retry")
 
 	var attempt int32
 	transport := newSQSTransportWithVis(queueURL, 5)
@@ -116,10 +116,17 @@ func TestE2ERetryThenAck(t *testing.T) {
 
 func TestE2EDLQ(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-dlq")
+	queueURL, dlqURL := env.createQueue(t, "e2e-dlq")
 
 	var dlqCalled int32
-	transport := newSQSTransportWithVis(queueURL, 5)
+	transport := sqst.New(sqst.Config{
+		QueueURL:          queueURL,
+		DLQURL:            dlqURL,
+		MaxMessages:       10,
+		WaitTime:          2,
+		VisibilityTimeout: 5,
+		BaseEndpoint:      flociEndpoint,
+	})
 
 	p := ringq.New().
 		Transport(transport).
@@ -162,7 +169,7 @@ func TestE2EDLQ(t *testing.T) {
 
 func TestE2EIdempotency(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-idem")
+	queueURL, _ := env.createQueue(t, "e2e-idem")
 
 	var called int32
 	transport := newSQSTransportWithVis(queueURL, 10)
@@ -220,7 +227,7 @@ func TestE2EIdempotency(t *testing.T) {
 
 func TestE2EBatchReceive(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-batch")
+	queueURL, _ := env.createQueue(t, "e2e-batch")
 
 	var count int32
 	transport := newSQSTransportWithVis(queueURL, 10)
@@ -264,7 +271,7 @@ func TestE2EBatchReceive(t *testing.T) {
 
 func TestE2EGracefulShutdown(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-shutdown")
+	queueURL, _ := env.createQueue(t, "e2e-shutdown")
 
 	var started int32
 	block := make(chan struct{})
@@ -310,7 +317,7 @@ func TestE2EGracefulShutdown(t *testing.T) {
 
 func TestE2EUnknownTopic(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-unknown")
+	queueURL, _ := env.createQueue(t, "e2e-unknown")
 
 	var errCalled int32
 	transport := newSQSTransportWithVis(queueURL, 5)

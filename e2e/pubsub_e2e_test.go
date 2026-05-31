@@ -286,3 +286,90 @@ func TestE2EGCPUnknownTopic(t *testing.T) {
 	t.Logf("OnError hook fired %d times — unknown topic message Nacked", atomic.LoadInt32(&errCalled))
 	env.cleanup(t)
 }
+
+func TestE2EGCPGracefulShutdown(t *testing.T) {
+	env := setupPubSubEnv(t)
+
+	var started int32
+	block := make(chan struct{})
+
+	transport := env.createTransport(t)
+
+	p := ringq.New().
+		Transport(transport).
+		Handle("test", func(_ context.Context, raw []byte) ringq.Result {
+			atomic.StoreInt32(&started, 1)
+			<-block
+			return ringq.Result{Action: ringq.Ack}
+		}).
+		Concurrency(1).
+		BufferSize(16)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go p.Run(ctx)
+	t.Log("GCP shutdown pipeline started...")
+	time.Sleep(500 * time.Millisecond)
+
+	if err := transport.Publish(ctx, ringq.Message{
+		ID:      "1",
+		Topic:   "test",
+		Payload: []byte("slow-gcp"),
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
+	t.Log("published slow message, waiting for handler to start...")
+
+	time.Sleep(3 * time.Second)
+	cancel()
+	t.Log("context cancelled, waiting for graceful drain...")
+
+	if n := atomic.LoadInt32(&started); n != 1 {
+		t.Errorf("expected handler to have started before shutdown")
+	}
+	t.Log("handler started before shutdown — completing inflight work")
+
+	close(block)
+	time.Sleep(500 * time.Millisecond)
+	env.cleanup(t)
+}
+
+func TestE2EGCPETAImmediateTask(t *testing.T) {
+	env := setupPubSubEnv(t)
+
+	var called int32
+	transport := env.createTransport(t)
+
+	p := ringq.New().
+		Transport(transport).
+		Handle("test", func(_ context.Context, raw []byte) ringq.Result {
+			atomic.AddInt32(&called, 1)
+			return ringq.Result{Action: ringq.Ack}
+		}).
+		Concurrency(2).
+		BufferSize(16)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go p.Run(ctx)
+	t.Log("GCP immediate task pipeline started...")
+	time.Sleep(500 * time.Millisecond)
+
+	if err := transport.Publish(ctx, ringq.Message{
+		ID:      "1",
+		Topic:   "test",
+		Payload: []byte("immediate-gcp"),
+	}); err != nil {
+		t.Fatalf("publish: %v", err)
+	}
+	t.Log("message published with NotBefore=0 (immediate)")
+
+	time.Sleep(3 * time.Second)
+	cancel()
+
+	if n := atomic.LoadInt32(&called); n != 1 {
+		t.Errorf("expected 1 immediate handler call, got %d", n)
+	}
+	t.Logf("handler called %d times — immediate delivery confirmed", atomic.LoadInt32(&called))
+	env.cleanup(t)
+}

@@ -13,7 +13,7 @@ import (
 
 func TestE2EETADelayedTask(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-eta")
+	queueURL, _ := env.createQueue(t, "e2e-eta")
 
 	var called int32
 	var callTime time.Time
@@ -72,7 +72,7 @@ func TestE2EETADelayedTask(t *testing.T) {
 
 func TestE2EETAImmediateTask(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-eta-immediate")
+	queueURL, _ := env.createQueue(t, "e2e-eta-immediate")
 
 	var called int32
 	transport := newSQSTransport(queueURL)
@@ -114,7 +114,7 @@ func TestE2EETAImmediateTask(t *testing.T) {
 
 func TestE2EETAExponentialBackoff(t *testing.T) {
 	env := setupEnv(t)
-	queueURL := env.createQueue(t, "e2e-eta-backoff")
+	queueURL, _ := env.createQueue(t, "e2e-eta-backoff")
 
 	var attempt int32
 	var callTimes []time.Time

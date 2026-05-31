@@ -68,7 +68,7 @@ func setupEnv(t *testing.T) *testEnv {
 	return globalEnv
 }
 
-func (e *testEnv) createQueue(t *testing.T, name string) string {
+func (e *testEnv) createQueue(t *testing.T, name string) (string, string) {
 	t.Helper()
 
 	dlqName := name + "-dlq"
@@ -88,7 +88,7 @@ func (e *testEnv) createQueue(t *testing.T, name string) string {
 	}
 
 	e.queues = append(e.queues, *out.QueueUrl, dlqURL)
-	return *out.QueueUrl
+	return *out.QueueUrl, dlqURL
 }
 
 func (e *testEnv) createDLQ(t *testing.T, name string) string {
