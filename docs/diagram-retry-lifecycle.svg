@@ -94,9 +94,9 @@
 
   <!-- ===== HORIZONTAL ARROWS IN ROW 3 ===== -->
 
-  <!-- Retrying → Ring Buffer -->
-  <line x1="240" y1="344" x2="652" y2="344" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
-  <text x="446" y="337" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">re-enqueue into ring</text>
+  <!-- Retrying → Ring Buffer (routed below Row 3) -->
+  <path d="M 240 344 L 240 390 L 720 390 L 720 368" fill="none" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="446" y="383" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">re-enqueue into ring</text>
 
   <!-- DelayedRetry → Transport -->
   <path d="M 352 368 L 352 430 L 372 430" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
