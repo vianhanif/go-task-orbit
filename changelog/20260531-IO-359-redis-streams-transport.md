@@ -28,14 +28,14 @@ Redis Streams is the direct upgrade path from go-workers (Redis Lists). It provi
 - **DLQ** — separate dead letter stream for failed messages
 
 #### Success criteria
-- [ ] `transport/redisstreams/` package implementing `ringq.Transport`
-- [ ] Publish: `XADD` to stream with topic attribute
-- [ ] Subscribe: `XREADGROUP` with consumer group for balanced delivery
-- [ ] Ack: `XACK` to acknowledge processed messages
-- [ ] Nack: `XCLAIM` for delayed retry (reassign after idle time)
-- [ ] SendToDLQ: `XADD` to dead letter stream
-- [ ] Stale message recovery: `XPENDING` + `XCLAIM` on startup (pod restart safety)
-- [ ] Consumer group auto-creation: `XGROUP CREATE` if not exists
+- [x] `transport/redisstreams/` package implementing `ringq.Transport`
+- [x] Publish: `XADD` to stream with topic attribute
+- [x] Subscribe: `XREADGROUP` with consumer group for balanced delivery
+- [x] Ack: `XACK` to acknowledge processed messages
+- [x] Nack: `XCLAIM` for delayed retry (reassign after idle time)
+- [x] SendToDLQ: `XADD` to dead letter stream
+- [x] Stale message recovery: `XPENDING` + `XCLAIM` on startup
+- [x] Consumer group auto-creation: `XGROUP CREATE` if not exists
 - [ ] Unit tests using miniredis (no external Redis needed)
 - [ ] E2E tests with real Redis container
 

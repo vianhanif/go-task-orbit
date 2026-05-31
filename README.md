@@ -116,7 +116,7 @@ pipeline.Run(ctx)
 | **Amazon SQS** | Supported | HTTP (REST) | AWS production — batch receive/ack, native DLQ |
 | **GCP Pub/Sub** | Supported | gRPC | GCP production — streaming pull, subscription-level DLQ |
 | **In-Memory** | Supported | In-process | Development / testing — zero dependencies |
-| **Redis Streams** | Planned | TCP (RESP) | Durable Redis job processing — consumer groups, XACK |
+| **Redis Streams** | Supported | TCP (RESP) | Durable Redis job processing — consumer groups, XACK, replay |
 | **Redis Pub/Sub** | Supported | TCP (RESP) | Fire-and-forget real-time broadcast messaging |
 | Kafka | Planned | TCP | Event-driven architectures |
 | MySQL | Planned | TCP | Transactional job queues |
@@ -289,7 +289,7 @@ Ring buffer batch operations are **3.3x faster** than equivalent Go channel batc
 | SQS E2E tests (Floci) | Done |
 | GCP E2E tests (Google Emulator) | Done |
 | GitHub Actions CI | Done |
-| Redis Streams | Planned |
+| Redis Streams | Done |
 | Redis Pub/Sub | Done |
 | Kafka | Planned |
 
