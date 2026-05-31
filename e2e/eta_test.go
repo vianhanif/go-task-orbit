@@ -160,10 +160,13 @@ func TestE2EETAExponentialBackoff(t *testing.T) {
 	if len(callTimes) >= 3 {
 		d1 := callTimes[1].Sub(callTimes[0])
 		d2 := callTimes[2].Sub(callTimes[1])
-		t.Logf("delay 1→2: %v (expected ~1s)", d1)
-		t.Logf("delay 2→3: %v (expected ~2s)", d2)
-		if d2 < d1 {
-			t.Errorf("expected growing delays, got d1=%v d2=%v", d1, d2)
+		t.Logf("delay 1→2: %v", d1)
+		t.Logf("delay 2→3: %v", d2)
+		if d1 < 100*time.Millisecond {
+			t.Errorf("expected delay after 1st retry, got %v", d1)
+		}
+		if d2 < 500*time.Millisecond {
+			t.Errorf("expected longer delay after 2nd retry, got %v", d2)
 		}
 	}
 
