@@ -295,15 +295,18 @@ task all         # lint + test + e2e
 | Worker pool | Done |
 | Pipeline builder API | Done |
 | Retry engine + DLQ | Done |
+| Exponential backoff | Done |
 | Idempotency layer | Done |
 | Graceful shutdown | Done |
+| ETA delayed tasks (timer wheel) | Done |
 | SQS transport | Done |
 | GCP Pub/Sub transport | Done |
 | In-Memory transport | Done |
 | SQS E2E tests (Floci) | Done |
-| GCP E2E tests (Emulator) | Done |
+| GCP E2E tests (Google Emulator) | Done |
 | GitHub Actions CI | Done |
 | Redis Streams | Planned |
+| Redis Pub/Sub | Planned |
 | Kafka | Planned |
 
 ## Comparison
