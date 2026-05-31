@@ -48,17 +48,9 @@ Current docs describe *what* the library does but not *why* the architecture cho
 
 ### Implementation Status
 
-**Done (17 of 21):**
-- README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
-- README: updated tagline to "cloud-native async execution runtime"
-- RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results
-- bench/: added Go channel and goroutine-per-message comparisons
-
-**Remaining (4 of 21):**
-- Item 10: Split /docs/ folder (deferred)
-- Item 12: Per-key concurrency feature (deferred)
-- Item 17: Flow diagrams (deferred — needs visual work)
-- Items 1-16, 18-21: Complete
+**Done (20 of 21):**
+**Remaining (1 of 21):**
+- Item 12: Per-key concurrency (deferred — new feature)
 
 ### Phase Summary
 
@@ -92,14 +84,10 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 7 | Comparison table | Done | B |
 | 8 | Retry docs expansion | Done | B |
 | 9 | Idempotency failure windows | Done | A |
-| 10 | Split /docs/ folder | Pending | C |
+| 10 | Split /docs/ folder | Done | C |
 | 11 | Benchmarks section | Done | C |
 | 12 | Per-key concurrency | Deferred | D |
-| 13 | Worker lifecycle docs | Done | A |
-| 14 | Ring buffer bottleneck note | Done | A |
-| 15 | Transport latency smoothing | Done | A |
-| 16 | Reposition: predictable bounded execution | Done | A |
-| 17 | Flow diagrams | Pending | A |
+| 17 | Flow diagrams | Done | A |
 | 18 | Ordering guarantees section (2nd review) | Done | A |
 | 19 | Ring buffer implementation details (2nd review) | Done | A |
 | 20 | Parallelism tuning guidance table (2nd review) | Done | A |
