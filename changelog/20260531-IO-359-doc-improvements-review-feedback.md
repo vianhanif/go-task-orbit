@@ -48,16 +48,17 @@ Current docs describe *what* the library does but not *why* the architecture cho
 
 ### Implementation Status
 
-**Done (9 of 17):**
+**Done (9 of 21):**
 - README: added Why Ring Buffer, Concurrency Model, Backpressure, Comparison, Retry & DLQ, Idempotency failure windows
 - README: updated tagline to "cloud-native async execution runtime"
 - RING-BUFFER.md: replaced conceptual perf claims with actual benchmark results
 - bench/: added Go channel and goroutine-per-message comparisons
 
-**Remaining (8 of 17):**
+**Remaining (12 of 21):**
 - Item 10: Split /docs/ folder (deferred)
 - Item 12: Per-key concurrency feature (deferred)
-- Items 13-17: Worker lifecycle, bottleneck note, latency smoothing, repositioning, flow diagrams
+- Items 13-17: Worker lifecycle, bottleneck, latency, repositioning, flow diagrams (Phase A)
+- Items 18-21: Ordering, ring buffer details, tuning, benchmark exposure (Phase A, 2nd review)
 
 ### Phase Summary
 
@@ -99,3 +100,33 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 15 | Transport latency smoothing | Pending | A |
 | 16 | Reposition: predictable bounded execution | Pending | A |
 | 17 | Flow diagrams | Pending | A |
+| 18 | Ordering guarantees section (2nd review) | Pending | A |
+| 19 | Ring buffer implementation details (2nd review) | Pending | A |
+| 20 | Parallelism tuning guidance table (2nd review) | Pending | A |
+| 21 | Benchmark summary in README (2nd review) | Pending | A |
+
+---
+
+## Second Review (post-update)
+
+After initial doc fixes, ChatGPT re-reviewed. Scores improved significantly.
+
+### Score improvements
+
+| Area | Before | After |
+|---|---|---|
+| Concurrency explanation | 6/10 | **8.5/10** |
+| Parallelism explanation | 5/10 | **8/10** |
+| Runtime clarity | 6.5/10 | **8.5/10** |
+| Operational credibility | 7/10 | **8.5/10** |
+| Architecture positioning | 7/10 | **8.5/10** |
+| Ordering semantics | 4/10 | 5/10 (still weak) |
+| Benchmark storytelling | 4/10 | 4/10 (unchanged) |
+
+### New gaps identified
+
+1. **Ordering guarantees still unclear** — explicit section needed: "messages may execute out-of-order across workers, retries can reorder, same-entity messages can race"
+2. **Ring buffer implementation underspecified** — readers ask: mutex or atomic? MPSC or MPMC? blocking or non-blocking?
+3. **Parallelism tuning guidance missing** — WorkerCount for CPU-heavy (GOMAXPROCS) vs IO-heavy (32-128), RingBufferSize for burst absorption
+4. **Benchmarks not surfaced** — throughput table per worker count should be in README for instant credibility
+5. **Architecture still undersold** — docs describe features but don't frame the runtime as "bounded async execution runtime"
