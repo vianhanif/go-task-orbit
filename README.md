@@ -3,10 +3,12 @@
 Cloud-native async execution runtime for Go — ring-buffer scheduling, pluggable transport backends (SQS, Pub/Sub, In-Memory).
 
 **Module:** `github.com/vianhanif/go-task-orbit`
-
 **Go:** 1.21+
-
 **CI:** [![E2E Tests](https://github.com/vianhanif/go-task-orbit/actions/workflows/e2e.yml/badge.svg)](https://github.com/vianhanif/go-task-orbit/actions/workflows/e2e.yml)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/vianhanif/go-task-orbit)](https://goreportcard.com/report/github.com/vianhanif/go-task-orbit)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue)](https://pkg.go.dev/github.com/vianhanif/go-task-orbit)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 <img src="architecture.svg" alt="go-task-orbit architecture" width="800">
 
