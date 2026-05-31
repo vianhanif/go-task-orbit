@@ -40,7 +40,7 @@ Without ETA support, callers must implement their own scheduling layer outside t
 - [x] On pod restart: SQS/Pub/Sub redeliver (visibility expired), timer wheel re-queues
 - [x] Graceful shutdown drains timer wheel to ring buffer
 - [x] Exponential backoff as default retry strategy (base * 2^attempt, max 10 retries)
-- [ ] E2E tests for ETA delay with each transport
+- [x] E2E tests for ETA delay with each transport
 
 ---
 
