@@ -21,18 +21,7 @@ Transport (SQS / Pub/Sub / In-Memory) → Ring Buffer → Idempotency Filter →
 
 ### Pipeline
 
-```mermaid
-flowchart LR
-    Producer -->|Publish| Transport
-    Transport -->|Receive| Poller
-    Poller -->|Enqueue| Ring[Ring Buffer]
-    Ring -->|Dequeue| Dispatcher
-    Dispatcher -->|Filter| Idem[Idempotency]
-    Idem -->|Dispatch| Workers[Worker Pool]
-    Workers -->|Ack| Transport
-    Workers -->|Retry| Ring
-    Workers -->|DLQ| Transport
-```
+![Pipeline: Producer → Transport → Poller → Ring Buffer → Dispatcher → Idempotency → Worker Pool → Ack/Retry/DLQ](docs/diagram-pipeline.svg)
 
 > See [docs/architecture.md](docs/architecture.md) for detailed flow diagrams (receive loop, retry lifecycle, shutdown sequence).
 
