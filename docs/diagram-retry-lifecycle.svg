@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 500" width="850" height="500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#0d1117"/>
@@ -24,100 +24,102 @@
     </marker>
   </defs>
 
-  <rect width="850" height="500" rx="16" fill="url(#bg)"/>
+  <rect width="900" height="550" rx="16" fill="url(#bg)"/>
 
-  <text x="425" y="42" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="20" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">Retry → DLQ Lifecycle</text>
-  <text x="425" y="62" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#8b949e">state machine — from receipt to terminal (Acked / DeadLettered)</text>
+  <text x="450" y="42" text-anchor="middle" font-family="SF Mono, Menlo, Monaco, Consolas, monospace" font-size="20" font-weight="bold" fill="#e6edf3" filter="url(#shadow)">Retry → DLQ Lifecycle</text>
+  <text x="450" y="62" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#8b949e">state machine — from receipt to terminal (Acked / DeadLettered)</text>
 
-  <!-- [*] start -->
-  <circle cx="210" cy="110" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
-  <circle cx="210" cy="110" r="6" fill="#e6edf3"/>
+  <!-- ===== ROW 1: Start → Received ===== -->
+  <circle cx="450" cy="100" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
+  <circle cx="450" cy="100" r="6" fill="#e6edf3"/>
 
-  <!-- Received -->
-  <rect x="160" y="145" width="100" height="45" rx="22" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="210" y="172" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#58a6ff">Received</text>
+  <rect x="395" y="130" width="110" height="48" rx="24" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="160" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#58a6ff">Received</text>
 
-  <!-- Arrow: [*] → Received -->
-  <line x1="210" y1="122" x2="210" y2="137" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <line x1="450" y1="112" x2="450" y2="122" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
 
-  <!-- Processing -->
-  <rect x="160" y="220" width="100" height="45" rx="22" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="210" y="247" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Processing</text>
+  <!-- ===== ROW 2: Processing → Acked ===== -->
+  <rect x="395" y="210" width="110" height="48" rx="24" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="240" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#d2a8ff">Processing</text>
 
-  <!-- Arrow: Received → Processing -->
-  <line x1="210" y1="190" x2="210" y2="212" stroke="#d2a8ff" stroke-width="2" marker-end="url(#arrowPurple)"/>
-  <text x="222" y="204" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">Handler called</text>
+  <line x1="450" y1="178" x2="450" y2="202" stroke="#d2a8ff" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="462" y="194" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">Handler called</text>
 
-  <!-- Acked (right) -->
-  <rect x="370" y="220" width="100" height="45" rx="22" fill="#0f1a10" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="420" y="247" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#3fb950">Acked</text>
+  <!-- Acked -->
+  <rect x="590" y="210" width="100" height="48" rx="24" fill="#0f1a10" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="640" y="240" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#3fb950">Acked</text>
 
-  <!-- Arrow: Processing → Acked -->
-  <line x1="260" y1="235" x2="362" y2="235" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
-  <text x="310" y="228" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">ResultAck</text>
-
-  <!-- Retrying (left) -->
-  <rect x="20" y="330" width="110" height="45" rx="22" fill="#161b22" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="75" y="357" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#f0883e">Retrying</text>
-
-  <!-- Arrow: Processing → Retrying -->
-  <path d="M 160 255 L 30 255 L 30 322" fill="none" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
-  <text x="45" y="285" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">ResultRetry</text>
-
-  <!-- DelayedRetry (bottom center) -->
-  <rect x="140" y="330" width="125" height="45" rx="22" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="202" y="352" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#58a6ff">DelayedRetry</text>
-  <text x="202" y="368" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Nack (vis timeout)</text>
-
-  <!-- Arrow: Processing → DelayedRetry -->
-  <path d="M 210 265 L 210 300 L 202 322" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
-  <text x="228" y="290" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">RetryWithDelay</text>
-
-  <!-- DeadLettered (right bottom) -->
-  <rect x="330" y="330" width="130" height="45" rx="22" fill="#3d1414" stroke="#f85149" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="395" y="352" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#f85149">DeadLettered</text>
-  <text x="395" y="368" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.7">SendToDLQ</text>
-
-  <!-- Arrow: Processing → DeadLettered -->
-  <path d="M 260 250 L 330 250 L 330 322" fill="none" stroke="#f85149" stroke-width="2" marker-end="url(#arrowRed)"/>
-  <text x="310" y="285" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.7">ResultDLQ</text>
-
-  <!-- RingBuf box -->
-  <rect x="520" y="330" width="130" height="45" rx="22" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="585" y="352" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Ring Buffer</text>
-  <text x="585" y="368" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">re-enqueue</text>
-
-  <!-- Arrow: Retrying → RingBuf -->
-  <path d="M 130 352 L 510 352" fill="none" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
-
-  <!-- Arrow: DelayedRetry → Transport -->
-  <path d="M 265 360 L 265 420 L 460 420 L 460 390" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
-  <text x="380" y="435" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">re-deliver via Transport</text>
-
-  <!-- Transport box -->
-  <rect x="380" y="370" width="130" height="45" rx="22" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="445" y="392" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#3fb950">Transport</text>
-  <text x="445" y="408" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">re-deliver</text>
-
-  <!-- Arrow: RingBuf → Received -->
-  <path d="M 585 330 L 585 250 L 260 250 L 260 190" fill="none" stroke="#d2a8ff" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowPurple)"/>
-  <text x="410" y="260" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">dispatcher picks up</text>
-
-  <!-- Transport → Received -->
-  <path d="M 400 390 L 400 255 L 260 255 L 260 190" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowGreen)"/>
-
-  <!-- Max attempts arrows -->
-  <!-- Retrying → DeadLettered -->
-  <path d="M 130 352 L 130 352" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.4"/>
-  <text x="230" y="300" font-family="-apple-system, sans-serif" font-size="8" fill="#f85149" opacity="0.6">max attempts</text>
+  <line x1="505" y1="234" x2="582" y2="234" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="545" y="227" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.7">ResultAck</text>
 
   <!-- [*] end Acked -->
-  <circle cx="420" cy="168" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
-  <circle cx="420" cy="168" r="6" fill="#e6edf3"/>
-  <line x1="420" y1="220" x2="420" y2="180" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <circle cx="640" cy="158" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
+  <circle cx="640" cy="158" r="6" fill="#e6edf3"/>
+  <line x1="640" y1="210" x2="640" y2="178" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
 
-  <!-- [*] end DeadLettered -->
-  <circle cx="540" cy="310" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
-  <circle cx="540" cy="310" r="6" fill="#e6edf3"/>
-  <path d="M 460 345 L 520 345 L 540 322" fill="none" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <!-- ===== ROW 3: Four destination states ===== -->
+
+  <!-- Retrying (left) -->
+  <rect x="130" y="320" width="110" height="48" rx="24" fill="#161b22" stroke="#f0883e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="185" y="350" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#f0883e">Retrying</text>
+
+  <path d="M 395 258 L 130 258 L 130 312" fill="none" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="150" y="280" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">ResultRetry</text>
+
+  <!-- DelayedRetry (center-left) -->
+  <rect x="290" y="320" width="125" height="48" rx="24" fill="#161b22" stroke="#58a6ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="352" y="345" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="11" font-weight="bold" fill="#58a6ff">DelayedRetry</text>
+  <text x="352" y="361" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">Nack (vis timeout)</text>
+
+  <path d="M 450 258 L 450 285 L 352 312" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="415" y="298" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">RetryWithDelay</text>
+
+  <!-- DeadLettered (center-right) -->
+  <rect x="465" y="320" width="130" height="48" rx="24" fill="#3d1414" stroke="#f85149" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="530" y="342" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="13" font-weight="bold" fill="#f85149">DeadLettered</text>
+  <text x="530" y="360" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.7">SendToDLQ</text>
+
+  <path d="M 505 258 L 530 258 L 530 312" fill="none" stroke="#f85149" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <text x="555" y="280" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.7">ResultDLQ</text>
+
+  <!-- Ring Buffer (right) -->
+  <rect x="660" y="320" width="130" height="48" rx="24" fill="#161b22" stroke="#d2a8ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="725" y="342" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#d2a8ff">Ring Buffer</text>
+  <text x="725" y="360" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">re-enqueue</text>
+
+  <!-- ===== ROW 4: Transport ===== -->
+  <rect x="380" y="420" width="130" height="48" rx="24" fill="#161b22" stroke="#3fb950" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="445" y="442" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="12" font-weight="bold" fill="#3fb950">Transport</text>
+  <text x="445" y="460" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e">re-deliver</text>
+
+  <!-- ===== HORIZONTAL ARROWS IN ROW 3 ===== -->
+
+  <!-- Retrying → Ring Buffer -->
+  <line x1="240" y1="344" x2="652" y2="344" stroke="#f0883e" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="446" y="337" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f0883e" opacity="0.7">re-enqueue into ring</text>
+
+  <!-- DelayedRetry → Transport -->
+  <path d="M 352 368 L 352 430 L 372 430" fill="none" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="365" y="405" font-family="-apple-system, sans-serif" font-size="9" fill="#58a6ff" opacity="0.7">Nack</text>
+
+  <!-- ===== MAX ATTEMPTS TO DLQ (dashed) ===== -->
+  <path d="M 185 368 L 185 500 L 530 500 L 530 376" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrowRed)" opacity="0.5"/>
+  <text x="360" y="513" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#f85149" opacity="0.6">max attempts exceeded</text>
+
+  <path d="M 352 368 L 352 500" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.3"/>
+
+  <!-- ===== LOOP-BACK ARROWS TO RECEIVED ===== -->
+
+  <!-- Ring Buffer → Received (up around right side) -->
+  <path d="M 725 320 L 725 160 L 513 160" fill="none" stroke="#d2a8ff" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowPurple)"/>
+  <text x="625" y="172" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#d2a8ff" opacity="0.7">dispatcher picks up</text>
+
+  <!-- Transport → Received (up around left side) -->
+  <path d="M 445 420 L 445 490 L 50 490 L 50 160 L 387 160" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowGreen)"/>
+  <text x="390" y="510" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#3fb950" opacity="0.6">re-deliver back to queue</text>
+
+  <!-- ===== [*] END DeadLettered ===== -->
+  <circle cx="640" cy="295" r="12" fill="#161b22" stroke="#e6edf3" stroke-width="1.5"/>
+  <circle cx="640" cy="295" r="6" fill="#e6edf3"/>
+  <path d="M 595 335 L 620 335 L 640 307" fill="none" stroke="#e6edf3" stroke-width="2" marker-end="url(#arrowGreen)"/>
 </svg>
