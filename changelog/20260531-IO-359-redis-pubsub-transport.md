@@ -22,13 +22,13 @@ Add a lightweight Redis Pub/Sub transport (`transport/redis/`) implementing `rin
 Teams already running Redis for caching or go-workers can incrementally adopt go-task-orbit without migrating queues to SQS/Pub/Sub. Redis Pub/Sub provides a simple entry point for low-risk workloads (notifications, live updates) before upgrading to Redis Streams for durable processing.
 
 #### Success criteria
-- [ ] `transport/redis/` package implementing `ringq.Transport` interface
-- [ ] Publish: `PUBLISH` to Redis channel
-- [ ] Subscribe: `SUBSCRIBE` / `PSUBSCRIBE` for channel patterns
-- [ ] Batch receive: Redis pub/sub delivers each message in a callback; ring buffer accumulates
-- [ ] Ack: no-op (Pub/Sub has no acknowledgment)
-- [ ] Nack: no-op (can't put a message back)
-- [ ] SendToDLQ: no-op (fire-and-forget — consider using Redis Streams for DLQ needs)
+- [x] `transport/redis/` package implementing `ringq.Transport` interface
+- [x] Publish: `PUBLISH` to Redis channel
+- [x] Subscribe: `SUBSCRIBE` / `PSUBSCRIBE` for channel patterns
+- [x] Batch receive: Redis pub/sub delivers each message in a callback; ring buffer accumulates
+- [x] Ack: no-op (Pub/Sub has no acknowledgment)
+- [x] Nack: no-op (can't put a message back)
+- [x] SendToDLQ: no-op (fire-and-forget — consider using Redis Streams for DLQ needs)
 - [ ] Channel-pattern routing: `X-Topic` attribute maps to Redis channel subscription
 - [ ] Unit tests using in-process Redis (miniredis or real Redis)
 

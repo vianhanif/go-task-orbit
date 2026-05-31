@@ -110,7 +110,7 @@ pipeline.Run(ctx)
 | **GCP Pub/Sub** | Supported | gRPC | GCP production — streaming pull, subscription-level DLQ |
 | **In-Memory** | Supported | In-process | Development / testing — zero dependencies |
 | **Redis Streams** | Planned | TCP (RESP) | Durable Redis job processing — consumer groups, XACK |
-| **Redis Pub/Sub** | Planned | TCP (RESP) | Fire-and-forget real-time broadcast messaging |
+| **Redis Pub/Sub** | Supported | TCP (RESP) | Fire-and-forget real-time broadcast messaging |
 | Kafka | Planned | TCP | Event-driven architectures |
 | MySQL | Planned | TCP | Transactional job queues |
 
@@ -306,7 +306,7 @@ task all         # lint + test + e2e
 | GCP E2E tests (Google Emulator) | Done |
 | GitHub Actions CI | Done |
 | Redis Streams | Planned |
-| Redis Pub/Sub | Planned |
+| Redis Pub/Sub | Done |
 | Kafka | Planned |
 
 ## Comparison
