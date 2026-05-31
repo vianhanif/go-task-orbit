@@ -25,6 +25,10 @@ Transport (SQS / Pub/Sub / In-Memory) → Ring Buffer → Idempotency Filter →
 
 > See [docs/architecture.md](docs/architecture.md) for detailed flow diagrams (receive loop, retry lifecycle, shutdown sequence).
 
+### Implementation
+
+The ring buffer is a bounded circular queue using a mutex for enqueue/dequeue with atomics for lock-free `Len()` visibility. Power-of-two sizing enables bitwise AND masking (`index = seq & (capacity-1)`) — no division overhead. Overflow behavior is configurable: Block, DropNewest, DropOldest, or Reject. Workers are a fixed goroutine pool with channel-based task submission. The current design prioritizes simplicity and predictable behavior over fully lock-free complexity — suitable for IO-bound workloads where dispatch overhead is negligible relative to handler execution time.
+
 
 ### Why Ring Buffer?
 
@@ -183,20 +187,23 @@ Retry state is **in-memory** (`ringq.Message.Attempts`). For SQS/Pub/Sub, transp
 
 > See [docs/retries.md](docs/retries.md) for transport-specific retry behavior, DLQ routing per transport, and detailed state-machine flow.
 
-## Observability
+### Failure Semantics
 
-```go
-pipeline.WithHooks(ringq.Hooks{
-    OnReceive:   func(ctx context.Context, count int) { /* batch receive span */ },
-    OnDispatch:  func(ctx context.Context, topic string) { /* dispatch span */ },
-    OnComplete:  func(ctx context.Context, topic string, dur time.Duration) { /* latency metric */ },
-    OnError:     func(ctx context.Context, topic string, err error) { /* error counter */ },
-    OnRetry:     func(ctx context.Context, topic string, msg ringq.Message, attempt int) { /* retry gauge */ },
-    OnDuplicate: func(ctx context.Context, key string) { /* duplicate counter */ },
-})
-```
+Async systems are judged by how they fail. Here are the guarantees and edge cases:
 
-**All hooks are optional.** The library has zero OpenTelemetry dependency.
+| Scenario | Behavior | Guarantee |
+|---|---|---|
+| Crash before Ack | Transport redelivers → handler runs again | At-least-once. Idempotency layer prevents duplicate side effects. |
+| Crash between Mark and Ack | IdemStore already persisted → duplicate filtered on redelivery | No duplicate processing. |
+| Visibility timeout expiry | SQS/Pub/Sub redeliver the message | Safe — idempotency or retry handles it. |
+| Max retries exceeded | Message routed to DLQ (SQS: separate queue, Pub/Sub: subscription DLQ topic) | No silent drops — DLQ is always attempted. |
+| Ring buffer overflow | Drop/Block/Reject policy activates | Predictable — never crashes, never unbounded memory. |
+| Poison message (always fails) | Attempts exhausted → DLQ | Stops retry amplification. Handler code responsible for idempotency. |
+| Graceful shutdown during processing | Inflight handlers complete, then workers exit | Drains active work — no mid-flight kills. |
+| Pod restart (backed transports) | SQS/Pub/Sub redeliver unacked messages | Messages survive restart. |
+| Pod restart (InMemory transport) | Messages in ring/timer are lost | No durability guarantee for InMemory — design intent. |
+
+**Key principle:** handlers should be idempotent regardless. The library provides the mechanisms (idempotency, retry, DLQ) — the handler is responsible for side-effect safety.
 
 ## Idempotency
 

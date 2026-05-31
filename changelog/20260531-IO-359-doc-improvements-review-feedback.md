@@ -92,6 +92,10 @@ Current docs describe *what* the library does but not *why* the architecture cho
 | 19 | Ring buffer implementation details (2nd review) | Done | A |
 | 20 | Parallelism tuning guidance table (2nd review) | Done | A |
 | 21 | Benchmark summary in README (2nd review) | Done | A |
+| 22 | Expanded benchmarks: scaling, p95, memory | Done | C |
+| 23 | Ring buffer implementation details | Done | A |
+| 24 | Failure-mode documentation | Done | A |
+| 25 | Partition-aware execution docs | Deferred | D |
 
 ---
 
