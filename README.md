@@ -125,7 +125,7 @@ pipeline.Run(ctx)
 
 ## Features
 
-- **Multi-cloud transport** — SQS (batch I/O), Pub/Sub (gRPC streaming), In-Memory (dev/test)
+- **Multi-cloud transport** — SQS (batch I/O), Pub/Sub (gRPC), In-Memory (dev/test), Redis Streams (consumer groups), Redis Pub/Sub (broadcast)
 - **Ring buffer scheduler** — power-of-two sizing, bitwise AND mask, atomic visibility, configurable overflow policies
 - **Bounded concurrency** — configurable worker pool, no goroutine leaks
 - **Pipeline builder API** — chainable configuration with topic-based handler routing
@@ -135,7 +135,7 @@ pipeline.Run(ctx)
 - **At-least-once delivery** — idempotency layer handles deduplication
 - **Graceful shutdown** — SIGTERM-aware draining for EKS/GKE/Kubernetes
 - **Type-safe handlers** — Go generics with pluggable codec (JSON default, raw bytes supported)
-- **E2E tested** — 13 integration tests across SQS and Pub/Sub against real cloud emulators
+- **E2E tested** — 19 integration tests across SQS and Pub/Sub against real cloud emulators
 
 ## Handler Example
 
@@ -256,7 +256,7 @@ task all         # lint + test + e2e
 
 ## Benchmarks
 
-Quick reference from `go test -bench=. ./bench/` (Intel i5-8257U, 4-core/8-thread, Go 1.21):
+Quick reference from `go test -bench=. ./bench/` (Intel i5-8257U, 4-core/8-thread):
 
 | Benchmark | ns/op | Throughput |
 |---|---|---|

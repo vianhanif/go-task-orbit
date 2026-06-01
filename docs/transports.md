@@ -21,6 +21,7 @@ type Transport interface {
 | **Pub/Sub** | gRPC | Persistent | `msg.Ack()` | `msg.Nack()` | DLQ topic (subscription policy) |
 | **In-Memory** | In-process | None | No-op | Re-publish | No-op |
 | **Redis Pub/Sub** | TCP (RESP) | None (at-most-once) | No-op | No-op | No-op |
+| **Redis Streams** | TCP (RESP) | Persistent | XACK | XCLAIM | Separate DLQ stream |
 
 ## Transport Selection
 
@@ -28,7 +29,7 @@ type Transport interface {
 |---|---|
 | AWS production workloads | SQS |
 | GCP production workloads | Pub/Sub |
-| Redis shops migrating from go-workers | Redis Streams (planned) |
+| Redis shops migrating from go-workers | Redis Streams (supported) |
 | Real-time broadcast (notifications, live dashboards) | Redis Pub/Sub |
 | Local development and testing | In-Memory |
 

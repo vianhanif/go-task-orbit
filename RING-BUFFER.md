@@ -83,31 +83,29 @@ index := sequence & mask // cheap modulo — no division
 
 This makes index calculation a single bitwise AND — orders of magnitude faster than `%`.
 
-### Memory Barrier Strategy
+### Synchronization Strategy
 
-The ring buffer synchronizes producers and consumers without locks using atomic operations:
+The ring buffer uses a `sync.Mutex` for enqueue and dequeue operations, with atomic integers for lock-free `Len()` visibility:
 
 ```
-Producer:                          Consumer:
-  1. Write payload to slot           1. Read head cursor (atomic)
-  2. StoreFence (memory barrier)     2. LoadFence (memory barrier)
-  3. Publish slot sequence (atomic)  3. Read payload from slot
-                                     4. Advance tail (atomic)
+Enqueue:                           Dequeue:
+  1. Lock mutex                      1. Lock mutex
+  2. Check count < capacity          2. Check count > 0
+  3. Write to slot at head           3. Read from slot at tail
+  4. Advance head                    4. Advance tail
+  5. Store head in atomic (visible)  5. Store tail in atomic (visible)
+  6. Unlock mutex                    6. Unlock mutex
 ```
 
-In Go, this maps to:
+The atomic head/tail cursors serve a single purpose: `Len()` can be read without acquiring the mutex — useful for metrics and health checks without blocking producers or consumers.
 
-```go
-// Producer
-slot.payload = msg          // plain write
-atomic.StoreUint64(&slot.sequence, seq)  // publish — acts as StoreFence
+The current design prioritizes **simplicity and predictable behavior** over fully lock-free complexity. The mutex is held very briefly (slot write + index update), and the real performance advantage comes from:
+- **Contiguous memory** — pre-allocated slots in one array
+- **Power-of-two sizing** — bitwise AND masking instead of modulo division
+- **Batch operations** — drain N items in one lock acquisition
+- **No heap allocation per message** — slots are reused, messages are passed by reference
 
-// Consumer
-seq := atomic.LoadUint64(&slot.sequence) // acquire — acts as LoadFence
-msg := slot.payload         // plain read (safe — sequence guarantees visibility)
-```
-
-The atomic store/load on `sequence` serves double duty: it tracks position AND acts as the memory barrier that guarantees the payload write is visible to consumers.
+For IO-bound workloads (the primary target), mutex overhead is negligible relative to handler execution time (DB queries, HTTP calls, etc.).
 
 ### Backpressure Policies
 
@@ -152,13 +150,13 @@ Go Channel (batch 10):     ██                                830,000 batch/s
 
 1. **Ring buffer batch is 3.3x faster than channel batch** — 365 ns vs 1206 ns per batch of 10. The ring's contiguous memory and batched dequeue save per-item overhead.
 
-2. **Ring buffer single is 1.9x faster than channel single** — 63 ns vs 121 ns. Lock-minimized design beats channel's mutex-based synchronization.
+2. **Ring buffer single is 1.9x faster than channel single** — 63 ns vs 121 ns. Contiguous memory and batched dequeue beats channel's per-message overhead.
 
 3. **Full pipeline at ~2.5M msg/s** — includes transport publish, ring enqueue, dispatch, worker pool execution, and handler. Throughput is bounded by the worker pool (64 goroutines), not the ring buffer.
 
 4. **Goroutine-per-message is wasteful** — 40 B/op and 2 allocs per message. At scale, this causes GC pressure and memory fragmentation. The ring buffer reuses pre-allocated slots (1 alloc per batch).
 
-5. **Zero allocations on hot path** — ring buffer single operations have 0 allocs/op. Batch operations have 1 alloc for the result slice (caller-visible).
+5. **Zero heap allocations on hot path** — ring buffer single operations have 0 allocs/op (7 B/op from interface boxing, not heap escape).
 
 ### Latency Distribution
 
@@ -168,7 +166,7 @@ Go Channel (batch 10):     ██                                830,000 batch/s
 | Go Channel (single) | 121ns | ~500ns | ~2μs |
 | Goroutine per msg | 314ns | ~5μs | ~50μs (scheduler) |
 
-The ring buffer's bounded, lock-minimized design produces **predictable latency** — critical for systems where tail latency matters (API backends, payment processing).
+The ring buffer's bounded, batched design produces **predictable latency** — critical for systems where tail latency matters (API backends, payment processing).
 
 ---
 
@@ -206,7 +204,7 @@ Ring buffers excel at throughput and predictability, but they're wrong for:
 | Property | How the Ring Buffer Achieves It |
 |---|---|
 | **High throughput** | Batch operations, no syscalls, no heap allocation per msg |
-| **Low, predictable latency** | Lock-minimized (atomics), cache-friendly, no GC pressure |
+| **Low, predictable latency** | Contiguous memory, batched I/O, cache-friendly, no GC pressure |
 | **Backpressure control** | Fixed size + configurable overflow policies |
 | **Memory safety** | Pre-allocated, bounded — no unbounded growth |
 | **Visibility** | Atomic head/tail give exact queue depth, drops, throughput |

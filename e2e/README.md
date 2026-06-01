@@ -31,10 +31,10 @@ Both transports share the same test scenarios. Each test:
 | 3 | DLQ | SQS, Pub/Sub | Handler returns DLQ → error hook fired → message routed to DLQ |
 | 4 | Idempotency | SQS, Pub/Sub | Two messages with same key → handler called once, duplicate filtered |
 | 5 | BatchReceive | SQS, Pub/Sub | N messages published → all N processed by handler(s) |
-| 6 | GracefulShutdown | SQS | Slow handler in-flight → cancel context → handler completes before exit |
+| 6 | GracefulShutdown | SQS, Pub/Sub | Slow handler in-flight → cancel context → handler completes before exit |
 | 7 | UnknownTopic | SQS, Pub/Sub | Message to unregistered topic → OnError hook fired → routed to DLQ |
 | 8 | ETADelayedTask | SQS, Pub/Sub | Message with NotBefore=3s → held in timer wheel → processed after delay |
-| 9 | ETAImmediateTask | SQS | Message with NotBefore=0 → processed immediately |
+| 9 | ETAImmediateTask | SQS, Pub/Sub | Message with NotBefore=0 → processed immediately |
 | 10 | ETAExponentialBackoff | SQS | Handler returns Retry repeatedly → delays grow exponentially
 
 ## Run Locally
