@@ -1,6 +1,6 @@
 module github.com/vianhanif/go-task-orbit
 
-go 1.21
+go 1.25.0
 
 require (
 	cloud.google.com/go/pubsub v1.50.2
